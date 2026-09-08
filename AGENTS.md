@@ -99,6 +99,9 @@
   `docs/` + kebab-case.
 - Conventional Commits (`feat:`, `fix:`, …), subject < 72 chars, body
   explains WHY.
+- **Merging.** This repo disallows merge commits (GitHub rejects
+  `--merge` with "Merge commits are not allowed"). Squash-merge PRs
+  (`gh pr merge <n> --squash --delete-branch`), or rebase.
 
 ## Section 7 — Tool Access
 
