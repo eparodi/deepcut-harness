@@ -71,5 +71,5 @@ machine.
 
 ## Implementation Notes
 
-- Skills are referenced from the shared `skills-test` repo (no per-repo
+- Skills are referenced from the shared [`deepcut-skills`](https://github.com/eparodi/deepcut-skills) repo (no per-repo
   copies yet).

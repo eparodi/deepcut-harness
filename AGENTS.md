@@ -2,7 +2,7 @@
 
 > Loaded automatically for every agent thread in this project. These
 > rules address DeepSeek-specific failure modes and enforce minimum
-> quality bars. Skill files (in the shared `skills-test` repo) add
+> quality bars. Skill files (in the shared [`deepcut-skills`](https://github.com/eparodi/deepcut-skills) repo) add
 > stack- and role-specific rules on top of these.
 
 ## Section 1 — DeepSeek-Specific Guardrails
@@ -33,15 +33,25 @@
 - **HTTP.** stdlib `http.ServeMux` + `html/template` + htmx. Handlers
   are read-only except explicitly mutating routes.
 - **Render contract.** The ONE htmx render choke point is
-  `internal/dashboard/handlers.go` (Rule A/B). Never branch on
+  `internal/dashboard/render.go` (Rule A/B). Never branch on
   `HX-Request` anywhere else.
+- **Pages.** Dashboard views are folder-per-view
+  (`pages/<name>/{<name>.html,<name>.go}`, keyed by route, arbitrary
+  nesting depth). The full page/template contract is documented in
+  `internal/dashboard/AGENTS.md`.
 - **Components.** Dashboard UI follows the folder-per-component contract
-  (`components/<name>/<name>.{html,css,js}`); new templates are declared
-  in `pageTemplates` (undeclared files panic at startup, by design).
+  (`components/<name>/<name>.{html,css,js}`); the component registry
+  concatenates them at startup (missing files panic, by design).
 - **Naming, error style, testing style.** Match adjacent files exactly
   (table-driven tests, `fmt.Errorf("context: %w", err)`).
 - **New pattern?** Point out none exists, propose it, get approval, then
   implement and document it.
+- **Skills.** Generic roles (`pm`, `architect`, `reviewer`, `qa`, etc.)
+  and generic stack skills (`go-htmx`, `go-chi`, `ai-engineer`,
+  `db-analyst`) load from the shared [`deepcut-skills`](https://github.com/eparodi/deepcut-skills) repo — never copied
+  into this repo. Only project-specific technical skills (e.g.
+  `go-harness` stack, `harness-engineer`/`dashboard-engineer` roles)
+  live in this repo's `.agents/skills/`.
 
 ## Section 3 — Ambiguity & Business Logic
 
@@ -110,9 +120,9 @@
 
 ## Section 10 — Session Learnings
 
-Generic learnings live in ONE shared place: `skills-test/AGENTS.md`
+Generic learnings live in ONE shared place: [`deepcut-skills`](https://github.com/eparodi/deepcut-skills) `AGENTS.md`
 Section 10 (code style, tool discipline, UI, payload verification,
-deploy ordering). Cite them as "skills-test AGENTS.md §10: <rule name>".
+deploy ordering). Cite them as "deepcut-skills AGENTS.md §10: <rule name>".
 This section keeps only Harness-specific learnings — none exist yet.
 
 *Last updated: 2026-09-08*

@@ -1,7 +1,6 @@
 package dashboard
 
 import (
-	"bytes"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -15,99 +14,91 @@ func newTestHandler(t *testing.T) http.Handler {
 	return New(config.Default(), nil).srv.Handler
 }
 
-// TestSummaryRenderContract pins the go-htmx Rule A/B contract: a direct
-// load returns the full document; an HX-Request returns only the swap
-// region (no doctype, no script tags, no title).
-func TestSummaryRenderContract(t *testing.T) {
+// get issues a GET and returns the status code and body.
+func get(t *testing.T, h http.Handler, path string, hx bool) (int, string) {
+	t.Helper()
+	req := httptest.NewRequest(http.MethodGet, path, nil)
+	if hx {
+		req.Header.Set("HX-Request", "true")
+	}
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	return rec.Code, rec.Body.String()
+}
+
+// TestRenderContract pins the go-htmx Rule A/B contract for every page: a
+// direct load returns the full document; an HX-Request returns only the
+// swap region (no doctype, no script tags, no title).
+func TestRenderContract(t *testing.T) {
 	handler := newTestHandler(t)
-	tests := []struct {
+	pages := []struct {
 		name    string
-		hx      bool
-		want    []string
-		notWant []string
+		path    string
+		title   string
+		heading string
 	}{
-		{
-			name: "full document",
-			hx:   false,
-			want: []string{
+		{name: "summary", path: "/", title: "Harness", heading: "Harness"},
+		{name: "app", path: "/app", title: "Workspace", heading: "Workspace"},
+	}
+	for _, p := range pages {
+		t.Run(p.name+" full", func(t *testing.T) {
+			code, body := get(t, handler, p.path, false)
+			if code != http.StatusOK {
+				t.Fatalf("status = %d, want 200", code)
+			}
+			for _, want := range []string{
 				"<!DOCTYPE html>",
 				`<script src="/static/htmx.min.js" defer></script>`,
 				`<script src="/static/app.js" defer></script>`,
-				`<title>Harness</title>`,
+				`<title>` + p.title + `</title>`,
 				`<meta name="htmx-config" content='{"history":"reload"}'>`,
-			},
-		},
-		{
-			name: "partial swap region only",
-			hx:   true,
-			want: []string{"<main>", "status-badge", "running"},
-			notWant: []string{
-				"<!DOCTYPE html>",
-				"<script",
-				"<title>",
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			req := httptest.NewRequest(http.MethodGet, "/", nil)
-			if tt.hx {
-				req.Header.Set("HX-Request", "true")
-			}
-			rec := httptest.NewRecorder()
-			handler.ServeHTTP(rec, req)
-			if rec.Code != http.StatusOK {
-				t.Fatalf("status = %d, want 200", rec.Code)
-			}
-			body := rec.Body.String()
-			for _, want := range tt.want {
+				p.heading,
+			} {
 				if !strings.Contains(body, want) {
-					t.Errorf("body missing %q\n--- body ---\n%s", want, body)
+					t.Errorf("full body missing %q", want)
 				}
 			}
-			for _, not := range tt.notWant {
+		})
+		t.Run(p.name+" partial", func(t *testing.T) {
+			code, body := get(t, handler, p.path, true)
+			if code != http.StatusOK {
+				t.Fatalf("status = %d, want 200", code)
+			}
+			for _, want := range []string{"<main>", p.heading} {
+				if !strings.Contains(body, want) {
+					t.Errorf("partial body missing %q", want)
+				}
+			}
+			for _, not := range []string{"<!DOCTYPE html>", "<script", "<title>"} {
 				if strings.Contains(body, not) {
-					t.Errorf("body unexpectedly contains %q\n--- body ---\n%s", not, body)
+					t.Errorf("partial body unexpectedly contains %q", not)
 				}
 			}
 		})
 	}
 }
 
-// TestPartialMatchesFullRegion pins that the partial is byte-identical
-// to the full document's swap region (extracted between the .main-wrap
+// TestPartialMatchesFullRegion pins that the partial is byte-identical to
+// the full document's swap region (extracted between the .main-wrap
 // opening and the script tags that live outside it).
 func TestPartialMatchesFullRegion(t *testing.T) {
-	engine, err := newTemplateEngine()
-	if err != nil {
-		t.Fatal(err)
-	}
-	data := basePage{Title: "Harness", Addr: "127.0.0.1:8787"}
-
-	var full, partial bytes.Buffer
-	if err := engine.render(&full, "summary", data); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.renderPartial(&partial, "summary", data); err != nil {
-		t.Fatal(err)
-	}
-
-	fullStr := full.String()
-	partStr := partial.String()
+	handler := newTestHandler(t)
+	_, full := get(t, handler, "/", false)
+	_, partial := get(t, handler, "/", true)
 
 	const open = `<div class="main-wrap">`
-	// The region ends at the </div> that closes .main-wrap, which sits
-	// immediately before the script tags that live OUTSIDE the region.
+	// The region ends at the </div> that closes .main-wrap, immediately
+	// before the script tags that live OUTSIDE the region.
 	const closeAnchor = `</div>
 <script src="/static/htmx.min.js" defer>`
-	start := strings.Index(fullStr, open)
-	end := strings.Index(fullStr, closeAnchor)
+	start := strings.Index(full, open)
+	end := strings.Index(full, closeAnchor)
 	if start < 0 || end < 0 || end < start {
 		t.Fatalf("could not locate swap region in full render")
 	}
-	region := fullStr[start+len(open) : end]
-	if strings.TrimSpace(region) != strings.TrimSpace(partStr) {
-		t.Errorf("partial != full page region\n--- partial ---\n%s\n--- region ---\n%s", partStr, region)
+	region := full[start+len(open) : end]
+	if strings.TrimSpace(region) != strings.TrimSpace(partial) {
+		t.Errorf("partial != full page region\n--- partial ---\n%s\n--- region ---\n%s", partial, region)
 	}
 }
 
@@ -132,13 +123,11 @@ func TestHTMXServed(t *testing.T) {
 // TestNotFoundRendersErrorPage pins the 404 layout page.
 func TestNotFoundRendersErrorPage(t *testing.T) {
 	handler := newTestHandler(t)
-	req := httptest.NewRequest(http.MethodGet, "/nope", nil)
-	rec := httptest.NewRecorder()
-	handler.ServeHTTP(rec, req)
-	if rec.Code != http.StatusNotFound {
-		t.Fatalf("status = %d, want 404", rec.Code)
+	code, body := get(t, handler, "/nope", false)
+	if code != http.StatusNotFound {
+		t.Fatalf("status = %d, want 404", code)
 	}
-	if !strings.Contains(rec.Body.String(), "Not found") {
+	if !strings.Contains(body, "Not found") {
 		t.Fatal("404 body missing the error page")
 	}
 }
