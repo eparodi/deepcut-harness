@@ -4,16 +4,17 @@
 
 You run up to six agent threads simultaneously in Zed, each with a
 different role skill loaded from the **shared skills repo**
-([`deepcut-skills`](https://github.com/eparodi/deepcut-skills) `.agents/skills/`). This repo does not carry per-repo skill
-copies yet.
+([`deepcut-skills`](https://github.com/eparodi/deepcut-skills) `.agents/skills/`). Project-specific technical skills (`go-harness`,
+`harness-engineer`, `dashboard-engineer`) live in this repo's `.agents/skills/`.
 
 | Thread | Skill | Can Write? | Can Terminal? | Model (default) | Model (heavy) |
 |--------|-------|-----------|--------------|-----------------|---------------|
 | PM | `pm` | specs only | ❌ | Flash | Pro |
 | Architect | `architect` | specs only | ❌ | Pro | — |
-| Backend Engineer | `backend-engineer` + `go-htmx` + `go-chi` | all Go code | ✅ | Flash | Pro |
-| AI Engineer | `ai-engineer` + `go-chi` | the LLM layer (`internal/llm/`) | ✅ (llm scope) | Flash | Pro |
-| DB Analyst | `db-analyst` + `go-chi` | Postgres migrations + store | ✅ | Pro | — |
+| Harness Engineer | `harness-engineer` + `go-harness` + `go-htmx` | all Go code | ✅ | Flash | Pro |
+| Dashboard Engineer | `dashboard-engineer` + `go-harness` + `go-htmx` | dashboard frontend | ✅ (dashboard scope) | Flash | Pro |
+| AI Engineer | `ai-engineer` + `go-harness` | the LLM layer (`internal/llm/`) | ✅ (llm scope) | Flash | Pro |
+| DB Analyst | `db-analyst` + `go-harness` | Postgres migrations + store | ✅ | Pro | — |
 | UX Designer | `ux-designer` | design artifacts | ❌ | Flash | Pro |
 | Reviewer | `reviewer` | ❌ | ✅ | Flash | Pro |
 | QA | `qa` | ❌ | ✅ | Flash | — |
@@ -23,9 +24,10 @@ Flash = `deepseek-v4-flash`, Pro = `deepseek-v4-pro`. The canonical
 routing policy (task-class table, escalation ladder, handoff template)
 lives in `deepcut-skills/HOW_WE_WORK.md` and deepcut-skills AGENTS.md §10.20.
 
-`go-chi` is loaded for generic Go backend standards (layering, errors,
-testing, DB) — its chi-router sections don't apply: Harness uses stdlib
-`http.ServeMux`. `go-htmx` is the dashboard's primary stack skill.
+`go-harness` is this repo's project-specific stack skill; it points to
+`go-chi` (generic Go backend standards — layering, errors, testing, DB;
+its chi-router sections don't apply: Harness uses stdlib
+`http.ServeMux`) and `go-htmx` (the dashboard's primary htmx skill).
 
 ---
 
@@ -57,7 +59,7 @@ Design, Task Checklist, Implementation Notes.
 1. **Requirements** (PM) → Review Gate
 2. **Design** (Architect) → Review Gate
 3. **Task Breakdown** (PM)
-4. **Implementation** (Backend Engineer, one task at a time, test-first)
+4. **Implementation** (Harness Engineer, one task at a time, test-first)
    → QA + Security audit in parallel at the end
 
 ## Handoff Protocol

@@ -71,9 +71,18 @@ deepcut-harness/
 
 ## Skills
 
-The shared skills live in the **[`deepcut-skills`](https://github.com/eparodi/deepcut-skills)** repo (the canonical hub)
-— this repo references them rather than carrying per-repo copies yet.
-Roles map to skills in `zed/profiles.json`. The relevant stack skills:
+The shared skills live in the **[`deepcut-skills`](https://github.com/eparodi/deepcut-skills)** repo (the canonical hub).
+This repo carries its own **project-specific technical skills** in
+`.agents/skills/`. Roles map to skills in `zed/profiles.json`.
+
+Project-specific skills (this repo):
+
+- `go-harness` — Go standards for Harness: single-binary layout, CLI
+  dispatch, folder-per-view/component, config loader, testing
+- `harness-engineer` — owns all Go implementation in `internal/`
+- `dashboard-engineer` — owns the dashboard frontend
+
+Shared stack skills (from `deepcut-skills`):
 
 - `go-htmx` — htmx v4 usage for `html/template` apps (primary stack skill)
 - `go-chi` — generic Go backend standards (layering, errors, testing,
@@ -83,6 +92,6 @@ Roles map to skills in `zed/profiles.json`. The relevant stack skills:
   ladder, retries/breaker, cost budget)
 - `db-analyst` — Postgres migrations and the store/query layer
 
-Generic roles (`pm`, `architect`, `ux-designer`, `backend-engineer`,
+Generic roles (`pm`, `architect`, `ux-designer`,
 `reviewer`, `qa`, `security-engineer`, `orchestrator`, `spec-driven`)
 load directly from [`deepcut-skills`](https://github.com/eparodi/deepcut-skills).
