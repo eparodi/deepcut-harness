@@ -31,6 +31,18 @@ var commands = []command{
 		errMsg: "version failed",
 		run:    versionCmd,
 	},
+	{
+		name:   "agent",
+		usage:  "manage agents (agent create|list|get|remove|attach|detach|search …)",
+		errMsg: "agent command failed",
+		run:    agentCmd,
+	},
+	{
+		name:   "skill",
+		usage:  "manage skills (skill create|list|get|remove|search …)",
+		errMsg: "skill command failed",
+		run:    skillCmd,
+	},
 }
 
 // Main dispatches the Harness subcommands (the os.Args[1:] slice) and

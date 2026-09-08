@@ -10,6 +10,7 @@ import (
 
 	"deepcut-harness/internal/config"
 	"deepcut-harness/internal/dashboard"
+	"deepcut-harness/internal/store"
 )
 
 // run starts the Harness dashboard and blocks until SIGINT/SIGTERM.
@@ -22,7 +23,13 @@ func run() error {
 		return err
 	}
 
-	srv := dashboard.New(cfg, logger)
+	st, err := store.Open(cfg.Store.Driver, cfg.Store.DSN)
+	if err != nil {
+		return err
+	}
+	defer st.Close()
+
+	srv := dashboard.New(cfg, logger, st)
 	if err := srv.Start(); err != nil {
 		return err
 	}

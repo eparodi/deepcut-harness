@@ -1,0 +1,16 @@
+{{define "content"}}
+<h1>Agents</h1>
+<p class="muted">The brains: a persona + goal, wired to an LLM model.</p>
+{{if .Agents}}
+<div class="table-scroll">
+<table>
+  <tr><th>name</th><th>model</th><th>skills</th></tr>
+  {{range .Agents}}
+  <tr><td>{{.Name}}</td><td>{{.Provider}}/{{.Model}}</td><td>{{len .SkillIDs}}</td></tr>
+  {{end}}
+</table>
+</div>
+{{else}}
+<p class="muted">no agents yet — create one with <code>harness agent create …</code></p>
+{{end}}
+{{end}}
