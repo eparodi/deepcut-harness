@@ -46,6 +46,12 @@
   (table-driven tests, `fmt.Errorf("context: %w", err)`).
 - **New pattern?** Point out none exists, propose it, get approval, then
   implement and document it.
+- **Skills.** Generic roles (`pm`, `architect`, `reviewer`, `qa`, etc.)
+  and generic stack skills (`go-htmx`, `go-chi`, `ai-engineer`,
+  `db-analyst`) load from the shared `skills-test` repo — never copied
+  into this repo. Only project-specific technical skills (e.g.
+  `go-harness` stack, `harness-engineer`/`dashboard-engineer` roles)
+  live in this repo's `.agents/skills/`.
 
 ## Section 3 — Ambiguity & Business Logic
 
