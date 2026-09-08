@@ -11,7 +11,7 @@ denied it and clarified the policy.
 **Missing rule:** no explicit rule said where skills live for this repo.
 
 **Fix:** added to root `AGENTS.md` §2 — generic roles/stack skills load
-from `skills-test`; only project-specific technical skills
+from [`deepcut-skills`](https://github.com/eparodi/deepcut-skills); only project-specific technical skills
 (`go-harness`, `harness-engineer`, `dashboard-engineer`) live in this
 repo.
 

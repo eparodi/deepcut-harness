@@ -2,7 +2,7 @@
 
 > Scoped rules for everything under `internal/dashboard/`. The root
 > `AGENTS.md` holds the always-on repo rules; the `go-htmx` skill (in
-> `skills-test`) holds the htmx-specific rules. This file documents the
+> [`deepcut-skills`](https://github.com/eparodi/deepcut-skills)) holds the htmx-specific rules. This file documents the
 > decisions that are specific to THIS repo's dashboard.
 
 ## Folder-per-view

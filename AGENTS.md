@@ -2,7 +2,7 @@
 
 > Loaded automatically for every agent thread in this project. These
 > rules address DeepSeek-specific failure modes and enforce minimum
-> quality bars. Skill files (in the shared `skills-test` repo) add
+> quality bars. Skill files (in the shared [`deepcut-skills`](https://github.com/eparodi/deepcut-skills) repo) add
 > stack- and role-specific rules on top of these.
 
 ## Section 1 — DeepSeek-Specific Guardrails
@@ -48,7 +48,7 @@
   implement and document it.
 - **Skills.** Generic roles (`pm`, `architect`, `reviewer`, `qa`, etc.)
   and generic stack skills (`go-htmx`, `go-chi`, `ai-engineer`,
-  `db-analyst`) load from the shared `skills-test` repo — never copied
+  `db-analyst`) load from the shared [`deepcut-skills`](https://github.com/eparodi/deepcut-skills) repo — never copied
   into this repo. Only project-specific technical skills (e.g.
   `go-harness` stack, `harness-engineer`/`dashboard-engineer` roles)
   live in this repo's `.agents/skills/`.
@@ -120,9 +120,9 @@
 
 ## Section 10 — Session Learnings
 
-Generic learnings live in ONE shared place: `skills-test/AGENTS.md`
+Generic learnings live in ONE shared place: [`deepcut-skills`](https://github.com/eparodi/deepcut-skills) `AGENTS.md`
 Section 10 (code style, tool discipline, UI, payload verification,
-deploy ordering). Cite them as "skills-test AGENTS.md §10: <rule name>".
+deploy ordering). Cite them as "deepcut-skills AGENTS.md §10: <rule name>".
 This section keeps only Harness-specific learnings — none exist yet.
 
 *Last updated: 2026-09-08*

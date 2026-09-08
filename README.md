@@ -71,7 +71,7 @@ deepcut-harness/
 
 ## Skills
 
-The shared skills live in the **`skills-test` repo** (the canonical hub)
+The shared skills live in the **[`deepcut-skills`](https://github.com/eparodi/deepcut-skills)** repo (the canonical hub)
 — this repo references them rather than carrying per-repo copies yet.
 Roles map to skills in `zed/profiles.json`. The relevant stack skills:
 
@@ -85,4 +85,4 @@ Roles map to skills in `zed/profiles.json`. The relevant stack skills:
 
 Generic roles (`pm`, `architect`, `ux-designer`, `backend-engineer`,
 `reviewer`, `qa`, `security-engineer`, `orchestrator`, `spec-driven`)
-load directly from `skills-test`.
+load directly from [`deepcut-skills`](https://github.com/eparodi/deepcut-skills).

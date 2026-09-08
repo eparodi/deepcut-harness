@@ -4,7 +4,7 @@
 
 You run up to six agent threads simultaneously in Zed, each with a
 different role skill loaded from the **shared skills repo**
-(`skills-test/.agents/skills/`). This repo does not carry per-repo skill
+([`deepcut-skills`](https://github.com/eparodi/deepcut-skills) `.agents/skills/`). This repo does not carry per-repo skill
 copies yet.
 
 | Thread | Skill | Can Write? | Can Terminal? | Model (default) | Model (heavy) |
@@ -21,7 +21,7 @@ copies yet.
 
 Flash = `deepseek-v4-flash`, Pro = `deepseek-v4-pro`. The canonical
 routing policy (task-class table, escalation ladder, handoff template)
-lives in `skills-test/HOW_WE_WORK.md` and skills-test AGENTS.md §10.20.
+lives in `deepcut-skills/HOW_WE_WORK.md` and deepcut-skills AGENTS.md §10.20.
 
 `go-chi` is loaded for generic Go backend standards (layering, errors,
 testing, DB) — its chi-router sections don't apply: Harness uses stdlib
