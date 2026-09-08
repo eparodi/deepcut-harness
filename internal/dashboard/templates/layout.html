@@ -1,0 +1,24 @@
+{{define "base"}}<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="htmx-config" content='{"history":"reload"}'>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<title>{{.Title}}</title>
+{{template "style"}}
+</head>
+<body>
+<div class="topbar">
+<a class="brand" href="/" hx-get="/" hx-target=".main-wrap" hx-push-url="true">Harness</a>
+</div>
+<div class="main-wrap">
+{{block "mainwrap" .}}<main>
+{{block "content" .}}{{end}}
+</main>{{end}}
+</div>
+<script src="/static/htmx.min.js" defer></script>
+<script src="/static/app.js" defer></script>
+</body>
+</html>
+{{end}}

@@ -1,0 +1,9 @@
+{{define "content"}}
+<h1>Harness</h1>
+<p class="muted">Local-first AI engineering team for your repositories.</p>
+<div class="cards">
+  <div class="card"><div class="k">status</div><div class="v">{{template "status-badge" .}}</div></div>
+  <div class="card"><div class="k">listen</div><div class="v">{{.Addr}}</div></div>
+</div>
+<p>This is the scaffold — Agents and Skills land next.</p>
+{{end}}

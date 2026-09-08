@@ -1,0 +1,27 @@
+# Secrets — never commit
+.env
+
+# Runtime data
+/data/
+harness.log
+
+# Build-time-fetched htmx (tools/fetchhtmx, sha256-pinned) — never committed
+/internal/dashboard/htmx/
+
+# Orchestrator working docs (anchored to repo root)
+/PLAN.md
+/LOOP_LOG.md
+
+# Parallel feature worktrees (git worktree add worktrees/<slug>)
+/worktrees/
+
+# Compiled binaries
+/harness
+/harness.exe
+
+# Local deployment config (structure only — no secrets)
+/config.json
+
+# Sandbox-local Go build caches (GOCACHE/GOPATH pointed into the workspace)
+/.gocache/
+/.gopath/
