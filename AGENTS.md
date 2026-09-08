@@ -33,11 +33,15 @@
 - **HTTP.** stdlib `http.ServeMux` + `html/template` + htmx. Handlers
   are read-only except explicitly mutating routes.
 - **Render contract.** The ONE htmx render choke point is
-  `internal/dashboard/handlers.go` (Rule A/B). Never branch on
+  `internal/dashboard/render.go` (Rule A/B). Never branch on
   `HX-Request` anywhere else.
+- **Pages.** Dashboard views are folder-per-view
+  (`pages/<name>/{<name>.html,<name>.go}`, keyed by route, arbitrary
+  nesting depth). The full page/template contract is documented in
+  `internal/dashboard/AGENTS.md`.
 - **Components.** Dashboard UI follows the folder-per-component contract
-  (`components/<name>/<name>.{html,css,js}`); new templates are declared
-  in `pageTemplates` (undeclared files panic at startup, by design).
+  (`components/<name>/<name>.{html,css,js}`); the component registry
+  concatenates them at startup (missing files panic, by design).
 - **Naming, error style, testing style.** Match adjacent files exactly
   (table-driven tests, `fmt.Errorf("context: %w", err)`).
 - **New pattern?** Point out none exists, propose it, get approval, then

@@ -38,11 +38,14 @@ deepcut-harness/
 ├── internal/
 │   ├── cli/                         # subcommand dispatch + default run loop
 │   ├── config/                      # strict config.json loader
-│   └── dashboard/                   # go-htmx HTTP dashboard
-│       ├── server.go                # routes + middleware chain
-│       ├── handlers.go              # render contract (Rule A/B)
-│       ├── templates.go             # page registry + template engine
-│       ├── templates/               # layout + pages
+│   └── dashboard/                   # go-htmx HTTP dashboard (folder-per-view)
+│       ├── dashboard.go             # server + middleware chain
+│       ├── render.go                # render contract (Rule A/B)
+│       ├── engine.go                # template engine
+│       ├── pages.go                 # page registration
+│       ├── layout/                  # shared layout (base + mainwrap)
+│       ├── page/                    # page descriptor (leaf package)
+│       ├── pages/                   # folder-per-view: summary/, app/, error/
 │       └── components/              # folder-per-component registry
 ├── tools/fetchhtmx/                 # pinned htmx fetch (sha256-verified)
 ├── specs/                           # single source of truth
@@ -57,9 +60,12 @@ deepcut-harness/
 - **CLI dispatch table.** Subcommands register once; usage text renders
   from the table so it can't drift. The no-args default runs the
   dashboard.
-- **`go-htmx` partial-swap contract.** `handlers.go` is the one render
+- **`go-htmx` partial-swap contract.** `render.go` is the one render
   choke point: `HX-Request: true` returns only the swap region, anything
   else returns the full document. htmx is embedded (build-time fetch).
+- **Folder-per-view.** `pages/<name>/{<name>.html, <name>.go}` co-locates
+  a view's template and handler, keyed by route, to any nesting depth
+  (contract documented in `internal/dashboard/AGENTS.md`).
 - **Folder-per-component registry.** `components/<name>/{<name>.html,
   <name>.css, <name>.js}` concatenated into single bundles at startup.
 

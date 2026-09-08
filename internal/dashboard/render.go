@@ -3,14 +3,12 @@ package dashboard
 import (
 	"log/slog"
 	"net/http"
-
-	"deepcut-harness/internal/config"
 )
 
-// handler serves pages. Read-only for now: every route is GET and none
-// mutate state.
+// handler serves the shared dashboard surface: the render contract and
+// the embedded static assets. Page handlers live in pages/<name>/ as
+// free functions over page.Deps — they never branch on HX-Request.
 type handler struct {
-	cfg       config.Config
 	templates *templateEngine
 	log       *slog.Logger
 	addr      string
@@ -20,33 +18,14 @@ func (h *handler) errLog(msg string, args ...any) {
 	h.log.Error(msg, args...)
 }
 
-// basePage is the shared page data for every layout render.
-type basePage struct {
-	Title string
-	Addr  string
-}
-
-// ---- pages ----
-
-// handleSummary renders the dashboard landing page.
-func (h *handler) handleSummary(w http.ResponseWriter, r *http.Request) {
-	h.renderPage(w, r, "summary", basePage{Title: "Harness", Addr: h.addr})
-}
-
-// handleNotFound renders the layout 404 for unknown HTML paths.
-func (h *handler) handleNotFound(w http.ResponseWriter, r *http.Request) {
-	h.renderPageStatus(w, r, "error", basePage{Title: "Not found", Addr: h.addr}, http.StatusNotFound)
-}
-
-// ---- render contract (Rule A/B) ----
-
-// renderPage is the single render choke point. HX-Request: true renders
-// only the swap region; anything else renders the full document. This is
-// the ONE place the branch lives — a second branching site would drift.
+// renderPage is the single render choke point for status 200.
 func (h *handler) renderPage(w http.ResponseWriter, r *http.Request, name string, data any) {
 	h.renderPageStatus(w, r, name, data, http.StatusOK)
 }
 
+// renderPageStatus is the ONE place the HX-Request branch lives (Rule A/B):
+// HX-Request: true renders only the swap region; anything else renders the
+// full document. A second branching site would drift.
 func (h *handler) renderPageStatus(w http.ResponseWriter, r *http.Request, name string, data any, status int) {
 	if r.Header.Get("HX-Request") == "true" {
 		h.renderPartial(w, name, data, status)

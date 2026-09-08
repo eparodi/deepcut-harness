@@ -1,8 +1,9 @@
 // Package dashboard is the embedded Harness HTTP dashboard. It renders
 // html/template pages with the go-htmx partial-swap contract (Rule A/B):
 // a direct load returns the full document, an HX-Request returns only
-// the swap region. htmx.min.js is fetched at build time (tools/fetchhtmx)
-// and embedded — no CDN at runtime.
+// the swap region. Views are folder-per-view (see AGENTS.md); htmx.min.js
+// is fetched at build time (tools/fetchhtmx) and embedded — no CDN at
+// runtime.
 package dashboard
 
 import (
@@ -26,8 +27,8 @@ type Server struct {
 }
 
 // New wires the dashboard: parses the embedded templates (panicking on
-// programmer error, like template.Must), registers the routes, and
-// assembles the middleware chain.
+// programmer error, like template.Must), registers the page routes and
+// the static assets, and assembles the middleware chain.
 func New(cfg config.Config, logger *slog.Logger) *Server {
 	if logger == nil {
 		logger = slog.Default()
@@ -40,19 +41,13 @@ func New(cfg config.Config, logger *slog.Logger) *Server {
 		// fail loudly at startup like template.Must.
 		panic(err)
 	}
-	h := &handler{
-		cfg:       cfg,
-		templates: engine,
-		log:       logger,
-		addr:      cfg.Dashboard.ListenAddr,
-	}
+	h := &handler{templates: engine, log: logger, addr: cfg.Dashboard.ListenAddr}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/{$}", h.handleSummary)
+	registerPages(mux, h)
 	mux.HandleFunc("/static/htmx.min.js", h.handleHTMXJS)
 	mux.HandleFunc("/static/app.js", h.handleAppJS)
 	mux.HandleFunc("/favicon.svg", h.handleFavicon)
-	mux.HandleFunc("/", h.handleNotFound)
 
 	// Middleware chain: recovery outermost, logging, headers, no-cache.
 	var root http.Handler = mux
