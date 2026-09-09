@@ -1,0 +1,16 @@
+{{define "content"}}
+<h1>Skills</h1>
+<p class="muted">The hands: a runtime + allowed commands.</p>
+{{if .Skills}}
+<div class="table-scroll">
+<table>
+  <tr><th>name</th><th>runtime</th><th>category</th></tr>
+  {{range .Skills}}
+  <tr><td>{{.Name}}</td><td>{{.Runtime}}</td><td>{{.Category}}</td></tr>
+  {{end}}
+</table>
+</div>
+{{else}}
+<p class="muted">no skills yet — create one with <code>harness skill create …</code></p>
+{{end}}
+{{end}}

@@ -10,6 +10,9 @@ func TestDefault(t *testing.T) {
 	if cfg.Dashboard.ListenAddr != "127.0.0.1:8787" {
 		t.Fatalf("default listen addr = %q, want 127.0.0.1:8787", cfg.Dashboard.ListenAddr)
 	}
+	if cfg.Store.Driver != "sqlite" || cfg.Store.DSN != "./data/harness.db" {
+		t.Fatalf("default store = %+v", cfg.Store)
+	}
 }
 
 func TestLoadMissingFileUsesDefaults(t *testing.T) {

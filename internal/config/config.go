@@ -19,6 +19,7 @@ const defaultListenAddr = "127.0.0.1:8787"
 // Config is the root runtime configuration for the Harness process.
 type Config struct {
 	Dashboard Dashboard `json:"dashboard"`
+	Store     Store     `json:"store"`
 }
 
 // Dashboard configures the local HTTP dashboard.
@@ -27,10 +28,20 @@ type Dashboard struct {
 	ListenAddr string `json:"listen_addr"`
 }
 
-// Default returns the zero-config defaults (localhost only).
+// Store configures the persistence backend (pluggable adapters).
+type Store struct {
+	// Driver selects the adapter: "sqlite" (the others land later).
+	Driver string `json:"driver"`
+	// DSN is the driver-specific data source name (a file path, or
+	// ":memory:" for SQLite).
+	DSN string `json:"dsn"`
+}
+
+// Default returns the zero-config defaults (localhost, SQLite on disk).
 func Default() Config {
 	return Config{
 		Dashboard: Dashboard{ListenAddr: defaultListenAddr},
+		Store:     Store{Driver: "sqlite", DSN: "./data/harness.db"},
 	}
 }
 
@@ -63,6 +74,12 @@ func Load(path string) (Config, error) {
 func (c *Config) Validate() error {
 	if c.Dashboard.ListenAddr == "" {
 		c.Dashboard.ListenAddr = defaultListenAddr
+	}
+	if c.Store.Driver == "" {
+		c.Store.Driver = "sqlite"
+	}
+	if c.Store.DSN == "" {
+		c.Store.DSN = "./data/harness.db"
 	}
 	return nil
 }

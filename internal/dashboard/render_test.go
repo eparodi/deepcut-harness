@@ -7,11 +7,17 @@ import (
 	"testing"
 
 	"deepcut-harness/internal/config"
+	"deepcut-harness/internal/store"
 )
 
 func newTestHandler(t *testing.T) http.Handler {
 	t.Helper()
-	return New(config.Default(), nil).srv.Handler
+	st, err := store.Open("sqlite", ":memory:")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { st.Close() })
+	return New(config.Default(), nil, st).srv.Handler
 }
 
 // get issues a GET and returns the status code and body.
@@ -39,6 +45,8 @@ func TestRenderContract(t *testing.T) {
 	}{
 		{name: "summary", path: "/", title: "Harness", heading: "Harness"},
 		{name: "app", path: "/app", title: "Workspace", heading: "Workspace"},
+		{name: "agents", path: "/agents", title: "Agents", heading: "Agents"},
+		{name: "skills", path: "/skills", title: "Skills", heading: "Skills"},
 	}
 	for _, p := range pages {
 		t.Run(p.name+" full", func(t *testing.T) {

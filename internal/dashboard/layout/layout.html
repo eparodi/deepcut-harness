@@ -11,6 +11,10 @@
 <body>
 <div class="topbar">
 <a class="brand" href="/" hx-get="/" hx-target=".main-wrap" hx-push-url="true">Harness</a>
+<nav class="topnav">
+<a href="/agents" hx-get="/agents" hx-target=".main-wrap" hx-push-url="true">Agents</a>
+<a href="/skills" hx-get="/skills" hx-target=".main-wrap" hx-push-url="true">Skills</a>
+</nav>
 </div>
 <div class="main-wrap">
 {{block "mainwrap" .}}<main>
