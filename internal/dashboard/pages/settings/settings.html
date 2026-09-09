@@ -3,20 +3,22 @@
 {{if .Error}}<div class="banner error" role="alert">{{.Error}}</div>{{end}}
 {{if .Saved}}<div class="banner ok" role="status">Saved — LLM changes apply immediately; store/dashboard changes apply on restart.</div>{{end}}
 
-<h2>Providers</h2>
+<section class="settings-form">
+<h3>Providers</h3>
+<p class="section-desc">One entry per OpenAI-compatible backend. The key value is written to <code>.env</code> (chmod 600); <code>api_key_env</code> is the name it reads from.</p>
 <div class="table-scroll">
 <table>
-  <tr><th>name</th><th>base_url</th><th>api_key_env</th><th></th></tr>
+  <tr><th>Name</th><th>Base URL</th><th>API key env</th><th></th></tr>
   {{range $name, $p := .Config.Providers}}
   <tr>
     <td>{{$name}}</td>
-    <td>{{$p.BaseURL}}</td>
-    <td>{{$p.APIKeyEnv}}</td>
+    <td><code>{{$p.BaseURL}}</code></td>
+    <td>{{if $p.APIKeyEnv}}<code>{{$p.APIKeyEnv}}</code>{{else}}<span class="muted">—</span>{{end}}</td>
     <td>
-      <form method="post" action="/settings" hx-post="/settings" hx-target=".main-wrap">
+      <form method="post" action="/settings" hx-post="/settings" hx-target=".main-wrap" class="inline-form">
         <input type="hidden" name="action" value="remove-provider">
         <input type="hidden" name="name" value="{{$name}}">
-        <button type="submit">Remove</button>
+        <button type="submit" class="btn danger">Remove</button>
       </form>
     </td>
   </tr>
@@ -24,28 +26,40 @@
 </table>
 </div>
 
-<h3>Add provider</h3>
 <form method="post" action="/settings" hx-post="/settings" hx-target=".main-wrap">
   <input type="hidden" name="action" value="add-provider">
-  <p><label>name <input name="name" required></label></p>
-  <p><label>base_url <input name="base_url" placeholder="https://api.example.com"></label></p>
-  <p><label>api_key_env <input name="api_key_env" placeholder="EXAMPLE_API_KEY"></label></p>
-  <p><label>key <input name="key" type="password" placeholder="sk-…"></label></p>
-  <button type="submit">Add provider</button>
+  <h4>Add provider</h4>
+  <div class="field"><label for="add-name">Name</label><input id="add-name" name="name" required placeholder="openrouter"><p class="help">Short label used to reference this provider elsewhere.</p></div>
+  <div class="field"><label for="add-base_url">Base URL</label><input id="add-base_url" name="base_url" placeholder="https://api.example.com/v1"><p class="help">OpenAI-compatible endpoint root. <code>/chat/completions</code> is appended automatically.</p></div>
+  <div class="field"><label for="add-api_key_env">API key environment variable</label><input id="add-api_key_env" name="api_key_env" placeholder="EXAMPLE_API_KEY"><p class="help">The environment variable the key is read from — also where the key below is written.</p></div>
+  <div class="field"><label for="add-key">API key</label><input id="add-key" name="key" type="password" placeholder="sk-…"><p class="help">Optional secret, written to <code>.env</code> (chmod 600). Leave blank if the key is already in the environment.</p></div>
+  <button type="submit" class="btn">Add provider</button>
 </form>
+</section>
 
-<h2>LLM</h2>
+<section class="settings-form">
+<h3>LLM</h3>
+<p class="section-desc">Reliability knobs for the provider layer — retries, circuit breaker, and the daily token budget.</p>
 <form method="post" action="/settings" hx-post="/settings" hx-target=".main-wrap">
   <input type="hidden" name="action" value="update-llm">
-  <p><label>max_retries <input name="max_retries" type="number" value="{{.Config.LLM.MaxRetries}}"></label></p>
-  <p><label>retry_base_ms <input name="retry_base_ms" type="number" value="{{.Config.LLM.RetryBaseMS}}"></label></p>
-  <p><label>breaker_failures <input name="breaker_failures" type="number" value="{{.Config.LLM.BreakerFailures}}"></label></p>
-  <p><label>breaker_cooldown_s <input name="breaker_cooldown_s" type="number" value="{{.Config.LLM.BreakerCooldownS}}"></label></p>
-  <p><label>daily_token_budget <input name="daily_token_budget" type="number" value="{{.Config.LLM.DailyTokenBudget}}"></label></p>
-  <button type="submit">Save LLM</button>
+  <div class="field"><label for="max_retries">Max retries</label><input id="max_retries" name="max_retries" type="number" value="{{.Config.LLM.MaxRetries}}"><p class="help">Times to retry a transient failure — HTTP 429, 500, or 503, or a network error — before giving up.</p></div>
+  <div class="field"><label for="retry_base_ms">Retry base (ms)</label><input id="retry_base_ms" name="retry_base_ms" type="number" value="{{.Config.LLM.RetryBaseMS}}"><p class="help">Starting backoff delay in milliseconds. Each retry doubles it, plus random jitter.</p></div>
+  <div class="field"><label for="breaker_failures">Breaker failures</label><input id="breaker_failures" name="breaker_failures" type="number" value="{{.Config.LLM.BreakerFailures}}"><p class="help">Consecutive failures that trip the circuit breaker. Once tripped, calls are rejected until the cooldown passes.</p></div>
+  <div class="field"><label for="breaker_cooldown_s">Breaker cooldown (s)</label><input id="breaker_cooldown_s" name="breaker_cooldown_s" type="number" value="{{.Config.LLM.BreakerCooldownS}}"><p class="help">Seconds the circuit breaker stays open after tripping before a call is allowed through.</p></div>
+  <div class="field"><label for="daily_token_budget">Daily token budget</label><input id="daily_token_budget" name="daily_token_budget" type="number" value="{{.Config.LLM.DailyTokenBudget}}"><p class="help">Total tokens allowed per UTC day across all calls. 0 means unlimited.</p></div>
+  <div class="field"><label for="budget_warn_fraction">Budget warn fraction</label><input id="budget_warn_fraction" name="budget_warn_fraction" type="number" step="any" value="{{.Config.LLM.BudgetWarnFraction}}"><p class="help">Log a warning once the daily budget is this full (0.8 = warn at 80%).</p></div>
+  <div class="field"><label class="checkbox"><input type="checkbox" name="ladder_allow_repair" value="true"{{if .Config.LLM.AllowRepair}} checked{{end}}> Repair malformed JSON</label><p class="help">When a JSON-mode response is invalid, try stripping code fences and extracting the JSON object before giving up.</p></div>
+  <div class="field"><label class="checkbox"><input type="checkbox" name="ladder_allow_reask" value="true"{{if .Config.LLM.AllowReask}} checked{{end}}> Re-ask on invalid JSON</label><p class="help">After repair fails, send the model its invalid output back and ask for valid JSON only.</p></div>
+  <button type="submit" class="btn">Save LLM</button>
 </form>
+</section>
 
-<h2>Store &amp; dashboard</h2>
-<p class="muted">store: <code>{{.Config.Store.Driver}}</code> / <code>{{.Config.Store.DSN}}</code> — restart to apply</p>
-<p class="muted">dashboard: <code>{{.Config.Dashboard.ListenAddr}}</code> — restart to apply</p>
+<section class="settings-form">
+<h3>Store &amp; dashboard <span class="section-tag">restart required</span></h3>
+<p class="section-desc">These values live in <code>config.json</code> and need a restart to change.</p>
+<ul class="file-only">
+  <li>store: <code>{{.Config.Store.Driver}}</code> / <code>{{.Config.Store.DSN}}</code></li>
+  <li>dashboard: <code>{{.Config.Dashboard.ListenAddr}}</code></li>
+</ul>
+</section>
 {{end}}

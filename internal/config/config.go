@@ -129,8 +129,11 @@ func (c *Config) Validate() error {
 	if c.LLM.BreakerCooldownS == 0 {
 		c.LLM.BreakerCooldownS = 60
 	}
-	if c.LLM.BudgetWarnFraction == 0 {
+	if c.LLM.BudgetWarnFraction <= 0 {
 		c.LLM.BudgetWarnFraction = 0.8
+	}
+	if c.LLM.BudgetWarnFraction > 1 {
+		c.LLM.BudgetWarnFraction = 1
 	}
 	if c.Providers == nil {
 		c.Providers = map[string]Provider{}

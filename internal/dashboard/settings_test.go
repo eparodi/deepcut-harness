@@ -95,3 +95,40 @@ func TestSettingsUpdateLLM(t *testing.T) {
 		t.Fatalf("llm not updated: %+v", got.LLM)
 	}
 }
+
+func TestSettingsUpdateLLMFlags(t *testing.T) {
+	h, rt, _, _ := newSettingsEnv(t)
+
+	values := url.Values{}
+	values.Set("action", "update-llm")
+	values.Set("ladder_allow_repair", "true")
+	values.Set("ladder_allow_reask", "true")
+	values.Set("budget_warn_fraction", "0.5")
+	if rec := postForm(t, h, values); rec.Code != http.StatusOK {
+		t.Fatalf("status = %d", rec.Code)
+	}
+	got := rt.Get()
+	if !got.LLM.AllowRepair || !got.LLM.AllowReask {
+		t.Fatalf("flags not set: %+v", got.LLM)
+	}
+	if got.LLM.BudgetWarnFraction != 0.5 {
+		t.Fatalf("budget warn fraction = %v, want 0.5", got.LLM.BudgetWarnFraction)
+	}
+}
+
+func TestSettingsUpdateLLMFlagsOffWhenUnchecked(t *testing.T) {
+	h, rt, _, _ := newSettingsEnv(t)
+
+	// Default() starts AllowRepair/AllowReask true; submitting without the
+	// checkbox params must persist them as false (unchecked == absent).
+	values := url.Values{}
+	values.Set("action", "update-llm")
+	values.Set("max_retries", "3")
+	if rec := postForm(t, h, values); rec.Code != http.StatusOK {
+		t.Fatalf("status = %d", rec.Code)
+	}
+	got := rt.Get()
+	if got.LLM.AllowRepair || got.LLM.AllowReask {
+		t.Fatalf("flags should be false when unchecked: %+v", got.LLM)
+	}
+}

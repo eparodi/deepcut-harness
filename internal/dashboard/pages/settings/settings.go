@@ -77,6 +77,9 @@ func apply(r *http.Request, d page.Deps, base page.Base) data {
 		cfg.LLM.BreakerFailures = atoi(r.FormValue("breaker_failures"))
 		cfg.LLM.BreakerCooldownS = atoi(r.FormValue("breaker_cooldown_s"))
 		cfg.LLM.DailyTokenBudget = atoi(r.FormValue("daily_token_budget"))
+		cfg.LLM.BudgetWarnFraction = atof(r.FormValue("budget_warn_fraction"))
+		cfg.LLM.AllowRepair = r.FormValue("ladder_allow_repair") == "true"
+		cfg.LLM.AllowReask = r.FormValue("ladder_allow_reask") == "true"
 	default:
 		return data{Base: base, Config: cfg, Error: "unknown action"}
 	}
@@ -93,4 +96,9 @@ func apply(r *http.Request, d page.Deps, base page.Base) data {
 func atoi(s string) int {
 	n, _ := strconv.Atoi(strings.TrimSpace(s))
 	return n
+}
+
+func atof(s string) float64 {
+	f, _ := strconv.ParseFloat(strings.TrimSpace(s), 64)
+	return f
 }

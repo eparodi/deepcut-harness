@@ -34,14 +34,15 @@ type Config struct {
 
 // Options carries the reliability knobs (from config).
 type Options struct {
-	MaxRetries       int
-	RetryBase        time.Duration
-	BreakerFailures  int
-	BreakerCooldown  time.Duration
-	AllowRepair      bool
-	AllowReask       bool
-	DailyTokenBudget int
-	Logger           *slog.Logger
+	MaxRetries         int
+	RetryBase          time.Duration
+	BreakerFailures    int
+	BreakerCooldown    time.Duration
+	AllowRepair        bool
+	AllowReask         bool
+	DailyTokenBudget   int
+	BudgetWarnFraction float64
+	Logger             *slog.Logger
 }
 
 // Client is an OpenAI-compatible llm.Provider.
@@ -55,9 +56,10 @@ type Client struct {
 	failures int
 	lastFail time.Time
 
-	budgetMu   sync.Mutex
-	budgetDay  string
-	budgetUsed int
+	budgetMu        sync.Mutex
+	budgetDay       string
+	budgetUsed      int
+	budgetWarnedDay string
 }
 
 // New returns a configured Client. Zero-value Options get safe defaults.
@@ -76,6 +78,9 @@ func New(cfg Config, opts Options) *Client {
 	}
 	if opts.BreakerCooldown == 0 {
 		opts.BreakerCooldown = 60 * time.Second
+	}
+	if opts.BudgetWarnFraction == 0 {
+		opts.BudgetWarnFraction = 0.8
 	}
 	return &Client{
 		cfg:  cfg,
@@ -284,6 +289,7 @@ func (c *Client) account(usage llm.Usage) {
 	defer c.budgetMu.Unlock()
 	c.rollBudgetLocked()
 	c.budgetUsed += usage.TotalTokens
+	c.warnBudgetLocked()
 }
 
 func (c *Client) rollBudgetLocked() {
@@ -291,6 +297,27 @@ func (c *Client) rollBudgetLocked() {
 	if c.budgetDay != today {
 		c.budgetDay = today
 		c.budgetUsed = 0
+	}
+}
+
+// warnBudgetLocked logs one warning per UTC day once the used token count
+// crosses budget_warn_fraction of the daily budget. It runs under budgetMu
+// (called from account); the warn-once guard is the budget day.
+func (c *Client) warnBudgetLocked() {
+	if c.opts.DailyTokenBudget <= 0 || c.opts.BudgetWarnFraction <= 0 {
+		return
+	}
+	if c.budgetWarnedDay == c.budgetDay {
+		return
+	}
+	threshold := int(float64(c.opts.DailyTokenBudget) * c.opts.BudgetWarnFraction)
+	if c.budgetUsed >= threshold {
+		c.budgetWarnedDay = c.budgetDay
+		c.log.Warn("llm daily token budget warning",
+			"used", c.budgetUsed,
+			"budget", c.opts.DailyTokenBudget,
+			"fraction", c.opts.BudgetWarnFraction,
+		)
 	}
 }
 

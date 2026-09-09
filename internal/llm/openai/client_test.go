@@ -1,12 +1,15 @@
 package openai
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -140,5 +143,29 @@ func TestCompleteJSONReask(t *testing.T) {
 	}
 	if out["name"] != "x" {
 		t.Fatalf("out = %+v", out)
+	}
+}
+
+func TestBudgetWarnFractionLogsOncePerDay(t *testing.T) {
+	var buf bytes.Buffer
+	logger := slog.New(slog.NewTextHandler(&buf, nil))
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, `{"choices":[{"message":{"content":"ok"}}],"usage":{"total_tokens":60}}`)
+	}))
+	defer srv.Close()
+
+	c := New(Config{BaseURL: srv.URL}, Options{
+		DailyTokenBudget:   100,
+		BudgetWarnFraction: 0.5,
+		Logger:             logger,
+	})
+	for i := 0; i < 2; i++ {
+		if _, err := c.Complete(context.Background(), llm.Request{}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if got := strings.Count(buf.String(), "daily token budget warning"); got != 1 {
+		t.Fatalf("warning count = %d, want 1\n%s", got, buf.String())
 	}
 }
