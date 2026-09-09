@@ -30,7 +30,7 @@ type Server struct {
 // New wires the dashboard: parses the embedded templates (panicking on
 // programmer error, like template.Must), registers the page routes and
 // the static assets, and assembles the middleware chain.
-func New(cfg config.Config, logger *slog.Logger, st store.Store) *Server {
+func New(cfg config.Config, logger *slog.Logger, st store.Store, rt *config.Runtime, editor *config.Editor) *Server {
 	if logger == nil {
 		logger = slog.Default()
 	}
@@ -45,7 +45,7 @@ func New(cfg config.Config, logger *slog.Logger, st store.Store) *Server {
 	h := &handler{templates: engine, log: logger, addr: cfg.Dashboard.ListenAddr}
 
 	mux := http.NewServeMux()
-	registerPages(mux, h, st)
+	registerPages(mux, h, st, rt, editor)
 	mux.HandleFunc("/static/htmx.min.js", h.handleHTMXJS)
 	mux.HandleFunc("/static/app.js", h.handleAppJS)
 	mux.HandleFunc("/favicon.svg", h.handleFavicon)

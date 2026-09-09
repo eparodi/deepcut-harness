@@ -121,3 +121,49 @@ code {
   border-radius: 4px;
   padding: 0.1em 0.35em;
 }
+
+.banner {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+  background: var(--surface);
+}
+
+.banner.error {
+  border-color: #dc2626;
+  color: #991b1b;
+}
+
+.banner.ok {
+  border-color: #16a34a;
+  color: #166534;
+}
+
+form p {
+  margin: 0.5rem 0;
+}
+
+label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+input {
+  font: inherit;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  width: 100%;
+  max-width: 360px;
+}
+
+button {
+  font: inherit;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  cursor: pointer;
+}

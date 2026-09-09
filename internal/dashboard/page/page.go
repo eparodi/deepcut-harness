@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"deepcut-harness/internal/config"
 	"deepcut-harness/internal/store"
 )
 
@@ -29,6 +30,11 @@ type Deps struct {
 	// Store is the persistence backend (nil when pages are rendered in
 	// tests without a store — read-only pages tolerate nil).
 	Store store.Store
+	// Runtime is the live config holder; the settings page reads and
+	// swaps it on save.
+	Runtime *config.Runtime
+	// Editor persists config + .env changes (settings page).
+	Editor *config.Editor
 	// Render executes the go-htmx render contract with status 200.
 	Render func(w http.ResponseWriter, r *http.Request, name string, data any)
 	// RenderStatus is Render with an explicit status (the 404 page).

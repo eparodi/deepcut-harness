@@ -1,0 +1,51 @@
+{{define "content"}}
+<h1>Settings</h1>
+{{if .Error}}<div class="banner error" role="alert">{{.Error}}</div>{{end}}
+{{if .Saved}}<div class="banner ok" role="status">Saved — LLM changes apply immediately; store/dashboard changes apply on restart.</div>{{end}}
+
+<h2>Providers</h2>
+<div class="table-scroll">
+<table>
+  <tr><th>name</th><th>base_url</th><th>api_key_env</th><th></th></tr>
+  {{range $name, $p := .Config.Providers}}
+  <tr>
+    <td>{{$name}}</td>
+    <td>{{$p.BaseURL}}</td>
+    <td>{{$p.APIKeyEnv}}</td>
+    <td>
+      <form method="post" action="/settings" hx-post="/settings" hx-target=".main-wrap">
+        <input type="hidden" name="action" value="remove-provider">
+        <input type="hidden" name="name" value="{{$name}}">
+        <button type="submit">Remove</button>
+      </form>
+    </td>
+  </tr>
+  {{end}}
+</table>
+</div>
+
+<h3>Add provider</h3>
+<form method="post" action="/settings" hx-post="/settings" hx-target=".main-wrap">
+  <input type="hidden" name="action" value="add-provider">
+  <p><label>name <input name="name" required></label></p>
+  <p><label>base_url <input name="base_url" placeholder="https://api.example.com"></label></p>
+  <p><label>api_key_env <input name="api_key_env" placeholder="EXAMPLE_API_KEY"></label></p>
+  <p><label>key <input name="key" type="password" placeholder="sk-…"></label></p>
+  <button type="submit">Add provider</button>
+</form>
+
+<h2>LLM</h2>
+<form method="post" action="/settings" hx-post="/settings" hx-target=".main-wrap">
+  <input type="hidden" name="action" value="update-llm">
+  <p><label>max_retries <input name="max_retries" type="number" value="{{.Config.LLM.MaxRetries}}"></label></p>
+  <p><label>retry_base_ms <input name="retry_base_ms" type="number" value="{{.Config.LLM.RetryBaseMS}}"></label></p>
+  <p><label>breaker_failures <input name="breaker_failures" type="number" value="{{.Config.LLM.BreakerFailures}}"></label></p>
+  <p><label>breaker_cooldown_s <input name="breaker_cooldown_s" type="number" value="{{.Config.LLM.BreakerCooldownS}}"></label></p>
+  <p><label>daily_token_budget <input name="daily_token_budget" type="number" value="{{.Config.LLM.DailyTokenBudget}}"></label></p>
+  <button type="submit">Save LLM</button>
+</form>
+
+<h2>Store &amp; dashboard</h2>
+<p class="muted">store: <code>{{.Config.Store.Driver}}</code> / <code>{{.Config.Store.DSN}}</code> — restart to apply</p>
+<p class="muted">dashboard: <code>{{.Config.Dashboard.ListenAddr}}</code> — restart to apply</p>
+{{end}}
