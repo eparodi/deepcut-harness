@@ -94,6 +94,17 @@ func TestFetchSchemeRejected(t *testing.T) {
 	}
 }
 
+func TestFetchNon2xx(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "not found", http.StatusNotFound)
+	}))
+	defer srv.Close()
+
+	if _, err := (Source{}).Fetch(context.Background(), srv.URL); err == nil {
+		t.Fatal("want error for non-2xx status")
+	}
+}
+
 func TestFetchMetadataBlocked(t *testing.T) {
 	if _, err := (Source{}).Fetch(context.Background(), "http://169.254.169.254/latest/meta-data"); err == nil {
 		t.Fatal("want error for metadata host")
