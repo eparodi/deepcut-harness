@@ -55,6 +55,22 @@ func TestValidateFillsEmptyListenAddr(t *testing.T) {
 	}
 }
 
+func TestDefaultLLMAndProviders(t *testing.T) {
+	cfg := Default()
+	if cfg.LLM.MaxRetries != 2 || cfg.LLM.RetryBaseMS != 250 {
+		t.Fatalf("llm defaults = %+v", cfg.LLM)
+	}
+	if cfg.Providers["deepseek"].BaseURL != "https://api.deepseek.com" || cfg.Providers["deepseek"].APIKeyEnv != "DEEPSEEK_API_KEY" {
+		t.Fatalf("deepseek provider = %+v", cfg.Providers["deepseek"])
+	}
+	if cfg.Providers["openai"].APIKeyEnv != "OPENAI_API_KEY" {
+		t.Fatalf("openai provider = %+v", cfg.Providers["openai"])
+	}
+	if cfg.Providers["ollama"].BaseURL != "http://localhost:11434/v1" {
+		t.Fatalf("ollama provider = %+v", cfg.Providers["ollama"])
+	}
+}
+
 func writeFile(path, content string) error {
 	return os.WriteFile(path, []byte(content), 0o644)
 }

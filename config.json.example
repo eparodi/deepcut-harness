@@ -5,5 +5,20 @@
   "store": {
     "driver": "sqlite",
     "dsn": "./data/harness.db"
+  },
+  "llm": {
+    "max_retries": 2,
+    "retry_base_ms": 250,
+    "breaker_consecutive_failures": 5,
+    "breaker_cooldown_s": 60,
+    "ladder_allow_repair": true,
+    "ladder_allow_reask": true,
+    "daily_token_budget": 0,
+    "budget_warn_fraction": 0.8
+  },
+  "providers": {
+    "deepseek": { "base_url": "https://api.deepseek.com", "api_key_env": "DEEPSEEK_API_KEY" },
+    "openai": { "base_url": "https://api.openai.com/v1", "api_key_env": "OPENAI_API_KEY" },
+    "ollama": { "base_url": "http://localhost:11434/v1", "api_key_env": "" }
   }
 }
