@@ -57,9 +57,9 @@
         "reasoning": "UI design, components, tokens, accessibility, UX copy. Design artifacts only."
       }
     },
-    "backend-engineer": {
-      "display_name": "Backend Engineer (Senior)",
-      "skills": ["backend-engineer", "go-chi", "go-htmx", "spec-driven"],
+    "harness-engineer": {
+      "display_name": "Harness Engineer (Senior)",
+      "skills": ["harness-engineer", "go-harness", "go-htmx", "spec-driven"],
       "tools": {
         "read_file": true,
         "grep": true,
@@ -76,9 +76,28 @@
         "reasoning": "Go implementation across internal/. Flash for spec'd work; Pro for interface design and hallucination recovery."
       }
     },
+    "dashboard-engineer": {
+      "display_name": "Dashboard Engineer (Senior)",
+      "skills": ["dashboard-engineer", "go-harness", "go-htmx"],
+      "tools": {
+        "read_file": true,
+        "grep": true,
+        "find_path": true,
+        "list_directory": true,
+        "write_file": true,
+        "edit_file": true,
+        "terminal": true,
+        "fetch": false
+      },
+      "model": {
+        "default": "deepseek-v4-flash",
+        "heavy": "deepseek-v4-pro",
+        "reasoning": "Owns the dashboard frontend: folder-per-view pages, the folder-per-component registry, and the vanilla-JS layer. Flash for templating/styles; Pro for layout-system decisions."
+      }
+    },
     "ai-engineer": {
       "display_name": "AI Engineer (Senior)",
-      "skills": ["ai-engineer", "go-chi", "spec-driven"],
+      "skills": ["ai-engineer", "go-harness", "spec-driven"],
       "tools": {
         "read_file": true,
         "grep": true,
@@ -97,7 +116,7 @@
     },
     "db-analyst": {
       "display_name": "DB Analyst (Senior)",
-      "skills": ["db-analyst", "go-chi"],
+      "skills": ["db-analyst", "go-harness"],
       "tools": {
         "read_file": true,
         "grep": true,
@@ -116,7 +135,7 @@
     },
     "reviewer": {
       "display_name": "Code Reviewer (Senior)",
-      "skills": ["reviewer", "go-chi", "go-htmx"],
+      "skills": ["reviewer", "go-harness", "go-htmx"],
       "tools": {
         "read_file": true,
         "grep": true,
@@ -173,7 +192,7 @@
     },
     "orchestrator": {
       "display_name": "Master Orchestrator (Single-Thread Team)",
-      "skills": ["orchestrator", "spec-driven", "go-chi", "go-htmx"],
+      "skills": ["orchestrator", "spec-driven", "go-harness", "go-htmx"],
       "tools": {
         "read_file": true,
         "grep": true,
