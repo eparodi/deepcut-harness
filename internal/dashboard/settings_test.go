@@ -10,6 +10,8 @@ import (
 	"testing"
 
 	"deepcut-harness/internal/config"
+	"deepcut-harness/internal/llm/openai"
+	"deepcut-harness/internal/source"
 	"deepcut-harness/internal/store"
 )
 
@@ -28,7 +30,8 @@ func newSettingsEnv(t *testing.T) (http.Handler, *config.Runtime, *config.Editor
 	cfg := config.Default()
 	rt := config.NewRuntime(cfg)
 	editor := config.NewEditor(filepath.Join(dir, "config.json"), filepath.Join(dir, ".env"))
-	srv := New(cfg, nil, st, rt, editor)
+	reg := openai.NewRegistry(cfg)
+	srv := New(cfg, nil, st, rt, editor, reg, source.Source{})
 	return srv.srv.Handler, rt, editor, dir, srv.CSRFToken()
 }
 

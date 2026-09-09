@@ -1,7 +1,7 @@
 # Agent & Skill Wizard (Draft)
 
 **Feature slug:** `agent-skill-wizard`
-**Status:** Draft
+**Status:** Implemented
 **Owner:** PM
 **Created:** 2026-09-08
 
@@ -86,17 +86,30 @@ it creates the record and links to `/agents` or `/skills`.
 
 ## Task Checklist
 
-- [ ] `internal/source` — `Reader` (read file + fetch URL) with guards
-- [ ] `internal/wizard` — ask/done loop + prompt construction + JSON protocol
-- [ ] Wizard marks source content as data in the prompt
-- [ ] Wizard validates the emitted definition before persisting
-- [ ] CLI: `wizard agent` / `wizard skill` (with `--source`)
-- [ ] Dashboard: chat form (folder-per-view) + create on `done`
-- [ ] Table-driven tests (fake provider: ask→done, malformed, budget veto)
-- [ ] `make build` / `make vet` / `make test` green
+- [x] `internal/source` — `Reader` (read file + fetch URL) with guards (source-reading PR)
+- [x] `internal/wizard` — ask/done loop + prompt construction + JSON protocol
+- [x] Wizard marks source content as data in the prompt
+- [x] Wizard validates the emitted definition before persisting
+- [x] CLI: `wizard agent` / `wizard skill` (with `--source` + `--provider`/`--model`/`--goal`)
+- [x] Dashboard: wizard at `/agents/wizard` and `/skills/wizard` (nested routes, folder-per-view) + create on `done`
+- [x] Table-driven tests (fake completer: ask→done, malformed, validation, prompt)
+- [x] `make build` / `make vet` / `make test` green
 
 ## Decisions (resolved at the gate)
 
 - **Shape:** adaptive `ask`/`done` (the LLM decides the next question).
 - **Sources:** external files/repos + the internet, via the read-only
   source layer (`specs/2026-09-08-source-reading.md`).
+- **LLM seam:** the wizard depends on `llm.JSONCompleter` (JSON-mode
+  completion with the malformed-response ladder), exposed by
+  `openai.Registry.JSONCompleter(name)` — `llm.Provider` is unchanged.
+- **Agents/Skills are not workspace-scoped.** The wizard does not take a
+  workspace root; agents and skills carry no workspace field. (Workspace
+  belongs to the future run/chat feature, not creation.)
+- **Provider + model selection.** The operator chooses both provider and
+  model in the wizard; they drive the wizard's reasoning and are stamped
+  onto a produced Agent (Skills carry no provider/model). Each provider
+  declares a `models` list; the dashboard model dropdown follows the
+  selected provider via a `/wizard-models` htmx fragment.
+- **Dashboard session state:** in-memory `wizard.Manager` keyed by an `id`
+  (single-user loopback; sessions are short-lived, not persisted).

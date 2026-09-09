@@ -1,6 +1,6 @@
 {{define "content"}}
 <h1>Agents</h1>
-<p class="muted">The brains: a persona + goal, wired to an LLM model.</p>
+<p class="muted">The brains: a persona + goal, wired to an LLM model. <a href="/agents/wizard" hx-get="/agents/wizard" hx-target=".main-wrap" hx-push-url="true">Create an agent</a></p>
 {{if .Agents}}
 <div class="table-scroll">
 <table>
@@ -11,6 +11,6 @@
 </table>
 </div>
 {{else}}
-<p class="muted">no agents yet — create one with <code>harness agent create …</code></p>
+<p class="muted">no agents yet.</p>
 {{end}}
 {{end}}

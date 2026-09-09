@@ -1,4 +1,4 @@
-// Package skills is the dashboard view at GET /skills.
+// Package skills is the dashboard view at /skills: it lists skills.
 package skills
 
 import (

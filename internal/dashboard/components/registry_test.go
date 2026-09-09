@@ -7,7 +7,7 @@ import (
 
 func TestHTMLPathsPinned(t *testing.T) {
 	got := HTMLPaths()
-	want := []string{"status-badge/status-badge.html"}
+	want := []string{"status-badge/status-badge.html", "wizard/wizard.html"}
 	if len(got) != len(want) {
 		t.Fatalf("HTMLPaths = %v, want %v", got, want)
 	}

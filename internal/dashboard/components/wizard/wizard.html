@@ -1,0 +1,37 @@
+{{define "wizard"}}
+{{$path := "/agents/wizard"}}{{if eq .Wizard.Target "skill"}}{{$path = "/skills/wizard"}}{{end}}
+{{if .Wizard.Error}}<div class="banner error" role="alert">{{.Wizard.Error}}</div>{{end}}
+{{if .Wizard.Created}}
+<div class="banner ok" role="status">Created {{.Wizard.Created}}.</div>
+<p><a href="/{{if eq .Wizard.Target "agent"}}agents{{else}}skills{{end}}" hx-get="/{{if eq .Wizard.Target "agent"}}agents{{else}}skills{{end}}" hx-target=".main-wrap" hx-push-url="true">View {{.Wizard.Target}}s</a></p>
+{{else if .Wizard.SessionID}}
+<p class="muted">Creating a {{.Wizard.Target}}…</p>
+<div class="wizard-q">{{.Wizard.Step.Question}}</div>
+<form method="post" action="{{$path}}" hx-post="{{$path}}" hx-target=".main-wrap">
+  <input type="hidden" name="csrf" value="{{csrf}}">
+  <input type="hidden" name="action" value="answer">
+  <input type="hidden" name="session_id" value="{{.Wizard.SessionID}}">
+  <div class="field"><label for="answer">Your answer</label><textarea id="answer" name="answer" rows="3"></textarea></div>
+  <button type="submit" class="btn">Send</button>
+</form>
+{{else}}
+<p class="muted">Create a {{.Wizard.Target}} by answering the wizard's questions.</p>
+<form method="post" action="{{$path}}" hx-post="{{$path}}" hx-target=".main-wrap">
+  <input type="hidden" name="csrf" value="{{csrf}}">
+  <input type="hidden" name="action" value="start">
+  <div class="field"><label for="goal">What should it do?</label><textarea id="goal" name="goal" rows="3"></textarea></div>
+  <div class="field"><label for="provider">Provider</label>
+    <select id="provider" name="provider" hx-get="/wizard-models" hx-target="#model-select" hx-trigger="change" hx-include="this">
+      {{range .Wizard.Providers}}<option value="{{.}}">{{.}}</option>{{end}}
+    </select>
+  </div>
+  <div class="field"><label for="model">Model</label>
+    <select id="model-select" name="model">
+      {{range .Wizard.Models}}<option value="{{.}}">{{.}}</option>{{end}}
+    </select>
+  </div>
+  <div class="field"><label for="source">Source</label><input id="source" name="source" placeholder="path or https://…"><p class="help">Optional. A file or URL the wizard reads as reference data.</p></div>
+  <button type="submit" class="btn">Start</button>
+</form>
+{{end}}
+{{end}}

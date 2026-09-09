@@ -8,6 +8,8 @@ import (
 	"testing"
 
 	"deepcut-harness/internal/config"
+	"deepcut-harness/internal/llm/openai"
+	"deepcut-harness/internal/source"
 	"deepcut-harness/internal/store"
 )
 
@@ -21,7 +23,8 @@ func newTestHandler(t *testing.T) http.Handler {
 	dir := t.TempDir()
 	rt := config.NewRuntime(config.Default())
 	editor := config.NewEditor(filepath.Join(dir, "config.json"), filepath.Join(dir, ".env"))
-	return New(config.Default(), nil, st, rt, editor).srv.Handler
+	reg := openai.NewRegistry(config.Default())
+	return New(config.Default(), nil, st, rt, editor, reg, source.Source{}).srv.Handler
 }
 
 // get issues a GET and returns the status code and body.
@@ -51,6 +54,8 @@ func TestRenderContract(t *testing.T) {
 		{name: "app", path: "/app", title: "Workspace", heading: "Workspace"},
 		{name: "agents", path: "/agents", title: "Agents", heading: "Agents"},
 		{name: "skills", path: "/skills", title: "Skills", heading: "Skills"},
+		{name: "agents-wizard", path: "/agents/wizard", title: "New Agent", heading: "New Agent"},
+		{name: "skills-wizard", path: "/skills/wizard", title: "New Skill", heading: "New Skill"},
 		{name: "settings", path: "/settings", title: "Settings", heading: "Settings"},
 	}
 	for _, p := range pages {

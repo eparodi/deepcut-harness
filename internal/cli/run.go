@@ -10,6 +10,8 @@ import (
 
 	"deepcut-harness/internal/config"
 	"deepcut-harness/internal/dashboard"
+	"deepcut-harness/internal/llm/openai"
+	"deepcut-harness/internal/source"
 	"deepcut-harness/internal/store"
 )
 
@@ -31,7 +33,14 @@ func run() error {
 	}
 	defer st.Close()
 
-	srv := dashboard.New(cfg, logger, st, rt, editor)
+	reg := openai.NewRegistry(cfg)
+	src := source.Source{
+		BlockPrivateHosts: cfg.Source.BlockPrivateHosts,
+		MaxBytes:          cfg.Source.MaxBytes,
+		Timeout:           time.Duration(cfg.Source.TimeoutMS) * time.Millisecond,
+	}
+
+	srv := dashboard.New(cfg, logger, st, rt, editor, reg, src)
 	if err := srv.Start(); err != nil {
 		return err
 	}
