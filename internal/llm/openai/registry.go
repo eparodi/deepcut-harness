@@ -25,13 +25,14 @@ func NewRegistry(cfg config.Config) *Registry {
 			BaseURL: pc.BaseURL,
 			APIKey:  os.Getenv(pc.APIKeyEnv),
 		}, Options{
-			MaxRetries:       cfg.LLM.MaxRetries,
-			RetryBase:        time.Duration(cfg.LLM.RetryBaseMS) * time.Millisecond,
-			BreakerFailures:  cfg.LLM.BreakerFailures,
-			BreakerCooldown:  time.Duration(cfg.LLM.BreakerCooldownS) * time.Second,
-			AllowRepair:      cfg.LLM.AllowRepair,
-			AllowReask:       cfg.LLM.AllowReask,
-			DailyTokenBudget: cfg.LLM.DailyTokenBudget,
+			MaxRetries:         cfg.LLM.MaxRetries,
+			RetryBase:          time.Duration(cfg.LLM.RetryBaseMS) * time.Millisecond,
+			BreakerFailures:    cfg.LLM.BreakerFailures,
+			BreakerCooldown:    time.Duration(cfg.LLM.BreakerCooldownS) * time.Second,
+			AllowRepair:        cfg.LLM.AllowRepair,
+			AllowReask:         cfg.LLM.AllowReask,
+			DailyTokenBudget:   cfg.LLM.DailyTokenBudget,
+			BudgetWarnFraction: cfg.LLM.BudgetWarnFraction,
 		})
 	}
 	return r

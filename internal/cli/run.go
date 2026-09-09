@@ -18,10 +18,12 @@ func run() error {
 	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelInfo}))
 	slog.SetDefault(logger)
 
-	cfg, err := config.Load("config.json")
+	editor := config.NewEditor("config.json", ".env")
+	cfg, err := editor.Load()
 	if err != nil {
 		return err
 	}
+	rt := config.NewRuntime(cfg)
 
 	st, err := store.Open(cfg.Store.Driver, cfg.Store.DSN)
 	if err != nil {
@@ -29,7 +31,7 @@ func run() error {
 	}
 	defer st.Close()
 
-	srv := dashboard.New(cfg, logger, st)
+	srv := dashboard.New(cfg, logger, st, rt, editor)
 	if err := srv.Start(); err != nil {
 		return err
 	}

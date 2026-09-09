@@ -3,10 +3,24 @@
 :root {
   --bg: #f2f2f7;
   --surface: #ffffff;
-  --text: #1a2029;
-  --muted: #666;
-  --border: #d9d9de;
-  --brand: #1a2029;
+  --text: #1d1d1f;
+  --muted: #6e6e73;
+  --border: #d1d1d6;
+  --brand: #1d1d1f;
+  /* Apple-tinted tokens (deepcut-skills AGENTS.md §10 palette): blue
+     action tint, win/loss tints for banners, soft panel shadow. */
+  --link: #0066cc;
+  --win: #1a7f37;
+  --loss: #c62828;
+  --chip-bg: #f2f2f7;
+  --striped: #f7f7f9;
+  --win-tint: #eaf6ef;
+  --win-tint-border: #c6e9d3;
+  --win-tint-text: #1a7f37;
+  --loss-tint: #fdeceb;
+  --loss-tint-border: #f5c6c0;
+  --loss-tint-text: #c62828;
+  --shadow-panel: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
 * { box-sizing: border-box; }
@@ -120,4 +134,191 @@ code {
   border: 1px solid var(--border);
   border-radius: 4px;
   padding: 0.1em 0.35em;
+}
+
+.banner {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+  background: var(--surface);
+}
+
+.banner.error {
+  border-color: var(--loss-tint-border);
+  background: var(--loss-tint);
+  color: var(--loss-tint-text);
+}
+
+.banner.ok {
+  border-color: var(--win-tint-border);
+  background: var(--win-tint);
+  color: var(--win-tint-text);
+}
+
+form p {
+  margin: 0.5rem 0;
+}
+
+label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+input {
+  font: inherit;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  width: 100%;
+  max-width: 360px;
+}
+
+button {
+  font: inherit;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+/* Settings page chrome (matches the sibling bot's settings-ui structure):
+   grouped section cards, muted field labels, Apple-blue primary buttons,
+   tinted success/error banners. Page-level, not a component. */
+.settings-form {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 16px 0;
+}
+
+.settings-form h3 {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+}
+
+.settings-form h4 {
+  margin: 14px 0 4px;
+  font-size: 0.95rem;
+}
+
+.section-tag {
+  font-weight: normal;
+  font-size: 12px;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1px 8px;
+  margin-left: 6px;
+}
+
+.section-desc {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 0 0 12px;
+}
+
+.section-note {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.field {
+  margin: 10px 0;
+}
+
+.field label {
+  display: block;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.field input,
+.field select,
+.field textarea {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+  width: 100%;
+  max-width: 420px;
+}
+
+.field input:focus-visible,
+.field select:focus-visible,
+.field textarea:focus-visible {
+  outline: none;
+  border-color: var(--link);
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.15);
+}
+
+.field textarea {
+  font-family: inherit;
+}
+
+.hint {
+  font-size: 13px;
+  color: var(--muted);
+  margin-left: 8px;
+}
+
+.help {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin: 4px 0 0;
+  max-width: 420px;
+}
+
+.field input[type=checkbox] {
+  width: auto;
+  margin: 0;
+}
+
+.field label.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 0;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.file-only {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 6px 0;
+  padding-left: 18px;
+}
+
+.btn {
+  display: inline-block;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--link);
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: inherit;
+}
+
+.btn.danger {
+  background: var(--loss);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--link);
+  outline-offset: 2px;
+}
+
+.inline-form {
+  display: inline;
 }

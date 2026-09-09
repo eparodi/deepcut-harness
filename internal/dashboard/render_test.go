@@ -3,6 +3,7 @@ package dashboard
 import (
 	"net/http"
 	"net/http/httptest"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -17,7 +18,10 @@ func newTestHandler(t *testing.T) http.Handler {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { st.Close() })
-	return New(config.Default(), nil, st).srv.Handler
+	dir := t.TempDir()
+	rt := config.NewRuntime(config.Default())
+	editor := config.NewEditor(filepath.Join(dir, "config.json"), filepath.Join(dir, ".env"))
+	return New(config.Default(), nil, st, rt, editor).srv.Handler
 }
 
 // get issues a GET and returns the status code and body.
@@ -47,6 +51,7 @@ func TestRenderContract(t *testing.T) {
 		{name: "app", path: "/app", title: "Workspace", heading: "Workspace"},
 		{name: "agents", path: "/agents", title: "Agents", heading: "Agents"},
 		{name: "skills", path: "/skills", title: "Skills", heading: "Skills"},
+		{name: "settings", path: "/settings", title: "Settings", heading: "Settings"},
 	}
 	for _, p := range pages {
 		t.Run(p.name+" full", func(t *testing.T) {
