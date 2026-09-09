@@ -21,6 +21,7 @@ type Config struct {
 	Dashboard Dashboard           `json:"dashboard"`
 	Store     Store               `json:"store"`
 	LLM       LLM                 `json:"llm"`
+	Source    Source              `json:"source"`
 	Providers map[string]Provider `json:"providers"`
 }
 
@@ -51,6 +52,19 @@ type LLM struct {
 	BudgetWarnFraction float64 `json:"budget_warn_fraction"`
 }
 
+// Source configures the read-only source layer (local file reads + URL
+// fetches), consumed by the wizard and future agents. The workspace root
+// itself is session-scoped (set by the chat feature on source.Source.Root),
+// not a config value.
+type Source struct {
+	// BlockPrivateHosts rejects private/loopback/link-local hosts on Fetch.
+	BlockPrivateHosts bool `json:"block_private_hosts"`
+	// MaxBytes caps a single Read/Fetch result (0 = 1 MiB).
+	MaxBytes int64 `json:"max_bytes"`
+	// TimeoutMS bounds a single Fetch (0 = 10s).
+	TimeoutMS int `json:"timeout_ms"`
+}
+
 // Provider configures one LLM backend (OpenAI-compatible).
 type Provider struct {
 	BaseURL   string `json:"base_url"`
@@ -72,6 +86,11 @@ func Default() Config {
 			AllowReask:         true,
 			DailyTokenBudget:   0, // 0 = unlimited
 			BudgetWarnFraction: 0.8,
+		},
+		Source: Source{
+			BlockPrivateHosts: false,
+			MaxBytes:          1 << 20,
+			TimeoutMS:         10000,
 		},
 		Providers: map[string]Provider{
 			"deepseek": {BaseURL: "https://api.deepseek.com", APIKeyEnv: "DEEPSEEK_API_KEY"},
@@ -134,6 +153,12 @@ func (c *Config) Validate() error {
 	}
 	if c.LLM.BudgetWarnFraction > 1 {
 		c.LLM.BudgetWarnFraction = 1
+	}
+	if c.Source.MaxBytes == 0 {
+		c.Source.MaxBytes = 1 << 20
+	}
+	if c.Source.TimeoutMS == 0 {
+		c.Source.TimeoutMS = 10000
 	}
 	if c.Providers == nil {
 		c.Providers = map[string]Provider{}

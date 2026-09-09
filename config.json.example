@@ -16,6 +16,11 @@
     "daily_token_budget": 0,
     "budget_warn_fraction": 0.8
   },
+  "source": {
+    "block_private_hosts": false,
+    "max_bytes": 1048576,
+    "timeout_ms": 10000
+  },
   "providers": {
     "deepseek": { "base_url": "https://api.deepseek.com", "api_key_env": "DEEPSEEK_API_KEY" },
     "openai": { "base_url": "https://api.openai.com/v1", "api_key_env": "OPENAI_API_KEY" },

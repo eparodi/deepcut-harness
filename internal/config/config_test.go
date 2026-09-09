@@ -71,6 +71,19 @@ func TestDefaultLLMAndProviders(t *testing.T) {
 	}
 }
 
+func TestDefaultSource(t *testing.T) {
+	cfg := Default()
+	if cfg.Source.MaxBytes != 1<<20 {
+		t.Fatalf("default max bytes = %d, want 1 MiB", cfg.Source.MaxBytes)
+	}
+	if cfg.Source.TimeoutMS != 10000 {
+		t.Fatalf("default timeout ms = %d, want 10000", cfg.Source.TimeoutMS)
+	}
+	if cfg.Source.BlockPrivateHosts {
+		t.Fatal("block_private_hosts should default false")
+	}
+}
+
 func writeFile(path, content string) error {
 	return os.WriteFile(path, []byte(content), 0o644)
 }
