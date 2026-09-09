@@ -149,3 +149,26 @@ func TestNotFoundRendersErrorPage(t *testing.T) {
 		t.Fatal("404 body missing the error page")
 	}
 }
+
+// TestWizardModelsEndpoint pins the /wizard-models fragment: it returns the
+// provider's models and 404s for an unknown provider.
+func TestWizardModelsEndpoint(t *testing.T) {
+	handler := newTestHandler(t)
+
+	req := httptest.NewRequest(http.MethodGet, "/wizard-models?provider=deepseek", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d", rec.Code)
+	}
+	if body := rec.Body.String(); !strings.Contains(body, "deepseek-v4-flash") || !strings.Contains(body, "deepseek-v4-pro") {
+		t.Fatalf("body missing models: %s", body)
+	}
+
+	req = httptest.NewRequest(http.MethodGet, "/wizard-models?provider=nope", nil)
+	rec = httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("unknown provider status = %d, want 404", rec.Code)
+	}
+}

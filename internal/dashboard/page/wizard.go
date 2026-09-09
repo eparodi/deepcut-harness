@@ -1,14 +1,11 @@
 package page
 
 import (
-	"context"
-	"fmt"
 	"net/http"
 	"sort"
 	"strings"
 
 	"deepcut-harness/internal/id"
-	"deepcut-harness/internal/source"
 	"deepcut-harness/internal/wizard"
 )
 
@@ -71,10 +68,14 @@ func (d Deps) wizardStart(r *http.Request, target wizard.Target, state WizardSta
 		state.Error = err.Error()
 		return state
 	}
-	sources, err := readSources(d.Source, r.Context(), r.FormValue("source"))
+	srcContent, err := d.Source.Load(r.Context(), r.FormValue("source"))
 	if err != nil {
 		state.Error = err.Error()
 		return state
+	}
+	var sources []string
+	if srcContent != "" {
+		sources = []string{srcContent}
 	}
 	session := wizard.New(target, completer, provider, strings.TrimSpace(r.FormValue("model")), strings.TrimSpace(r.FormValue("goal")), sources)
 	step, err := session.Next(r.Context())
@@ -155,23 +156,4 @@ func firstProvider(names []string) string {
 		return names[0]
 	}
 	return "deepseek"
-}
-
-func readSources(reader source.Source, ctx context.Context, src string) ([]string, error) {
-	src = strings.TrimSpace(src)
-	if src == "" {
-		return nil, nil
-	}
-	if strings.HasPrefix(src, "http://") || strings.HasPrefix(src, "https://") {
-		content, err := reader.Fetch(ctx, src)
-		if err != nil {
-			return nil, fmt.Errorf("source: %w", err)
-		}
-		return []string{content}, nil
-	}
-	content, err := reader.Read(ctx, src)
-	if err != nil {
-		return nil, fmt.Errorf("source: %w", err)
-	}
-	return []string{content}, nil
 }

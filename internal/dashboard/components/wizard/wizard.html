@@ -21,7 +21,7 @@
   <input type="hidden" name="action" value="start">
   <div class="field"><label for="goal">What should it do?</label><textarea id="goal" name="goal" rows="3"></textarea></div>
   <div class="field"><label for="provider">Provider</label>
-    <select id="provider" name="provider" hx-get="/wizard-models" hx-target="#model-select" hx-trigger="change" hx-include="this">
+    <select id="provider" name="provider" hx-get="/wizard-models" hx-target="#model-select" hx-trigger="change" hx-params="provider">
       {{range .Wizard.Providers}}<option value="{{.}}">{{.}}</option>{{end}}
     </select>
   </div>

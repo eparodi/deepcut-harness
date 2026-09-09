@@ -58,9 +58,13 @@ func wizardRun(target wizard.Target, args []string, reg *openai.Registry, st sto
 	}
 
 	reader := source.Source{}
-	sources, err := readSources(reader, flags["source"])
+	srcContent, err := reader.Load(context.Background(), flags["source"])
 	if err != nil {
-		return err
+		return fmt.Errorf("source: %w", err)
+	}
+	var sources []string
+	if srcContent != "" {
+		sources = []string{srcContent}
 	}
 
 	in := bufio.NewReader(stdin)
@@ -108,27 +112,6 @@ func defaultProvider(reg *openai.Registry) string {
 		return names[0]
 	}
 	return "deepseek"
-}
-
-// readSources reads the --source value (a local path or an http(s) URL).
-func readSources(reader source.Source, src string) ([]string, error) {
-	src = strings.TrimSpace(src)
-	if src == "" {
-		return nil, nil
-	}
-	ctx := context.Background()
-	if strings.HasPrefix(src, "http://") || strings.HasPrefix(src, "https://") {
-		content, err := reader.Fetch(ctx, src)
-		if err != nil {
-			return nil, fmt.Errorf("source %s: %w", src, err)
-		}
-		return []string{content}, nil
-	}
-	content, err := reader.Read(ctx, src)
-	if err != nil {
-		return nil, fmt.Errorf("source %s: %w", src, err)
-	}
-	return []string{content}, nil
 }
 
 // persistWizard validates (already done by the caller) and stores the
