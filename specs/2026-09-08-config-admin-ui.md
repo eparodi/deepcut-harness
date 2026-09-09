@@ -1,7 +1,7 @@
 # Config Admin UI (Draft)
 
 **Feature slug:** `config-admin-ui`
-**Status:** Draft
+**Status:** Approved
 **Owner:** PM
 **Created:** 2026-09-08
 
