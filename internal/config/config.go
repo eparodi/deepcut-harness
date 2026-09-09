@@ -18,8 +18,10 @@ const defaultListenAddr = "127.0.0.1:8787"
 
 // Config is the root runtime configuration for the Harness process.
 type Config struct {
-	Dashboard Dashboard `json:"dashboard"`
-	Store     Store     `json:"store"`
+	Dashboard Dashboard           `json:"dashboard"`
+	Store     Store               `json:"store"`
+	LLM       LLM                 `json:"llm"`
+	Providers map[string]Provider `json:"providers"`
 }
 
 // Dashboard configures the local HTTP dashboard.
@@ -37,11 +39,45 @@ type Store struct {
 	DSN string `json:"dsn"`
 }
 
-// Default returns the zero-config defaults (localhost, SQLite on disk).
+// LLM configures the provider layer's reliability knobs.
+type LLM struct {
+	MaxRetries         int     `json:"max_retries"`
+	RetryBaseMS        int     `json:"retry_base_ms"`
+	BreakerFailures    int     `json:"breaker_consecutive_failures"`
+	BreakerCooldownS   int     `json:"breaker_cooldown_s"`
+	AllowRepair        bool    `json:"ladder_allow_repair"`
+	AllowReask         bool    `json:"ladder_allow_reask"`
+	DailyTokenBudget   int     `json:"daily_token_budget"`
+	BudgetWarnFraction float64 `json:"budget_warn_fraction"`
+}
+
+// Provider configures one LLM backend (OpenAI-compatible).
+type Provider struct {
+	BaseURL   string `json:"base_url"`
+	APIKeyEnv string `json:"api_key_env"`
+}
+
+// Default returns the zero-config defaults (localhost, SQLite, the
+// common OpenAI-compatible providers, and permissive LLM knobs).
 func Default() Config {
 	return Config{
 		Dashboard: Dashboard{ListenAddr: defaultListenAddr},
 		Store:     Store{Driver: "sqlite", DSN: "./data/harness.db"},
+		LLM: LLM{
+			MaxRetries:         2,
+			RetryBaseMS:        250,
+			BreakerFailures:    5,
+			BreakerCooldownS:   60,
+			AllowRepair:        true,
+			AllowReask:         true,
+			DailyTokenBudget:   0, // 0 = unlimited
+			BudgetWarnFraction: 0.8,
+		},
+		Providers: map[string]Provider{
+			"deepseek": {BaseURL: "https://api.deepseek.com", APIKeyEnv: "DEEPSEEK_API_KEY"},
+			"openai":   {BaseURL: "https://api.openai.com/v1", APIKeyEnv: "OPENAI_API_KEY"},
+			"ollama":   {BaseURL: "http://localhost:11434/v1", APIKeyEnv: ""},
+		},
 	}
 }
 
@@ -80,6 +116,24 @@ func (c *Config) Validate() error {
 	}
 	if c.Store.DSN == "" {
 		c.Store.DSN = "./data/harness.db"
+	}
+	if c.LLM.MaxRetries == 0 {
+		c.LLM.MaxRetries = 2
+	}
+	if c.LLM.RetryBaseMS == 0 {
+		c.LLM.RetryBaseMS = 250
+	}
+	if c.LLM.BreakerFailures == 0 {
+		c.LLM.BreakerFailures = 5
+	}
+	if c.LLM.BreakerCooldownS == 0 {
+		c.LLM.BreakerCooldownS = 60
+	}
+	if c.LLM.BudgetWarnFraction == 0 {
+		c.LLM.BudgetWarnFraction = 0.8
+	}
+	if c.Providers == nil {
+		c.Providers = map[string]Provider{}
 	}
 	return nil
 }

@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+
+	"github.com/joho/godotenv"
 )
 
 // command is one Harness subcommand: its name (the first CLI argument),
@@ -50,6 +52,10 @@ var commands = []command{
 // failure, 2 on an unknown subcommand. The no-args default runs the
 // dashboard.
 func Main(args []string, stdout, stderr io.Writer) int {
+	// Load a gitignored .env (API keys) if present — best-effort; a
+	// missing .env is not an error, the providers just have empty keys.
+	_ = godotenv.Load()
+
 	if len(args) > 0 {
 		for _, c := range commands {
 			if c.name == args[0] {
