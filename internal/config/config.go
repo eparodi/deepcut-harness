@@ -67,8 +67,9 @@ type Source struct {
 
 // Provider configures one LLM backend (OpenAI-compatible).
 type Provider struct {
-	BaseURL   string `json:"base_url"`
-	APIKeyEnv string `json:"api_key_env"`
+	BaseURL   string   `json:"base_url"`
+	APIKeyEnv string   `json:"api_key_env"`
+	Models    []string `json:"models"`
 }
 
 // Default returns the zero-config defaults (localhost, SQLite, the
@@ -93,9 +94,9 @@ func Default() Config {
 			TimeoutMS:         10000,
 		},
 		Providers: map[string]Provider{
-			"deepseek": {BaseURL: "https://api.deepseek.com", APIKeyEnv: "DEEPSEEK_API_KEY"},
-			"openai":   {BaseURL: "https://api.openai.com/v1", APIKeyEnv: "OPENAI_API_KEY"},
-			"ollama":   {BaseURL: "http://localhost:11434/v1", APIKeyEnv: ""},
+			"deepseek": {BaseURL: "https://api.deepseek.com", APIKeyEnv: "DEEPSEEK_API_KEY", Models: []string{"deepseek-v4-flash", "deepseek-v4-pro"}},
+			"openai":   {BaseURL: "https://api.openai.com/v1", APIKeyEnv: "OPENAI_API_KEY", Models: []string{"gpt-4o-mini", "gpt-4o"}},
+			"ollama":   {BaseURL: "http://localhost:11434/v1", APIKeyEnv: "", Models: []string{"llama3.2", "qwen2.5"}},
 		},
 	}
 }

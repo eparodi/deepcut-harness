@@ -1,4 +1,4 @@
-// Package agents is the dashboard view at GET /agents.
+// Package agents is the dashboard view at /agents: it lists agents.
 package agents
 
 import (

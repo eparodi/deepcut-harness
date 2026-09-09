@@ -6,24 +6,32 @@ import (
 	"deepcut-harness/internal/config"
 	"deepcut-harness/internal/dashboard/page"
 	"deepcut-harness/internal/dashboard/pages/agents"
+	agentswizard "deepcut-harness/internal/dashboard/pages/agents/wizard"
 	"deepcut-harness/internal/dashboard/pages/app"
 	errpage "deepcut-harness/internal/dashboard/pages/error"
 	"deepcut-harness/internal/dashboard/pages/settings"
 	"deepcut-harness/internal/dashboard/pages/skills"
+	skillswizard "deepcut-harness/internal/dashboard/pages/skills/wizard"
 	"deepcut-harness/internal/dashboard/pages/summary"
+	"deepcut-harness/internal/llm/openai"
+	"deepcut-harness/internal/source"
 	"deepcut-harness/internal/store"
+	"deepcut-harness/internal/wizard"
 )
 
 // registerPages parses each page's template into the engine and registers
 // its route. The catch-all 404 page is listed last so it only claims
 // paths no other page handles.
-func registerPages(mux *http.ServeMux, h *handler, st store.Store, rt *config.Runtime, editor *config.Editor) {
+func registerPages(mux *http.ServeMux, h *handler, st store.Store, rt *config.Runtime, editor *config.Editor, reg *openai.Registry, src source.Source) {
 	deps := page.Deps{
 		Addr:         h.addr,
 		Log:          h.log,
 		Store:        st,
 		Runtime:      rt,
 		Editor:       editor,
+		LLM:          reg.JSONCompleter,
+		Source:       src,
+		Wizard:       wizard.NewManager(),
 		Render:       h.renderPage,
 		RenderStatus: h.renderPageStatus,
 	}
@@ -32,6 +40,8 @@ func registerPages(mux *http.ServeMux, h *handler, st store.Store, rt *config.Ru
 		app.Page(),
 		agents.Page(),
 		skills.Page(),
+		agentswizard.Page(),
+		skillswizard.Page(),
 		settings.Page(),
 		errpage.Page(),
 	}

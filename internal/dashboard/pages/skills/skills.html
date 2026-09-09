@@ -1,6 +1,6 @@
 {{define "content"}}
 <h1>Skills</h1>
-<p class="muted">The hands: a runtime + allowed commands.</p>
+<p class="muted">The hands: a runtime + allowed commands. <a href="/skills/wizard" hx-get="/skills/wizard" hx-target=".main-wrap" hx-push-url="true">Create a skill</a></p>
 {{if .Skills}}
 <div class="table-scroll">
 <table>
@@ -11,6 +11,6 @@
 </table>
 </div>
 {{else}}
-<p class="muted">no skills yet — create one with <code>harness skill create …</code></p>
+<p class="muted">no skills yet.</p>
 {{end}}
 {{end}}

@@ -9,12 +9,15 @@ package dashboard
 import (
 	"context"
 	"fmt"
+	"html"
 	"log/slog"
 	"net"
 	"net/http"
 	"time"
 
 	"deepcut-harness/internal/config"
+	"deepcut-harness/internal/llm/openai"
+	"deepcut-harness/internal/source"
 	"deepcut-harness/internal/store"
 )
 
@@ -31,7 +34,7 @@ type Server struct {
 // New wires the dashboard: parses the embedded templates (panicking on
 // programmer error, like template.Must), registers the page routes and
 // the static assets, and assembles the middleware chain.
-func New(cfg config.Config, logger *slog.Logger, st store.Store, rt *config.Runtime, editor *config.Editor) *Server {
+func New(cfg config.Config, logger *slog.Logger, st store.Store, rt *config.Runtime, editor *config.Editor, reg *openai.Registry, src source.Source) *Server {
 	if logger == nil {
 		logger = slog.Default()
 	}
@@ -47,7 +50,8 @@ func New(cfg config.Config, logger *slog.Logger, st store.Store, rt *config.Runt
 	h := &handler{templates: engine, log: logger, addr: cfg.Dashboard.ListenAddr}
 
 	mux := http.NewServeMux()
-	registerPages(mux, h, st, rt, editor)
+	registerPages(mux, h, st, rt, editor, reg, src)
+	mux.HandleFunc("/wizard-models", h.handleWizardModels(rt))
 	mux.HandleFunc("/static/htmx.min.js", h.handleHTMXJS)
 	mux.HandleFunc("/static/app.js", h.handleAppJS)
 	mux.HandleFunc("/favicon.svg", h.handleFavicon)
@@ -100,6 +104,27 @@ func (s *Server) Addr() string {
 // client that renders a form outside the csrf template func).
 func (s *Server) CSRFToken() string {
 	return s.csrfToken
+}
+
+// handleWizardModels serves the model <option> fragment for a provider, so
+// the wizard's model dropdown follows the selected provider via htmx.
+func (h *handler) handleWizardModels(rt *config.Runtime) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			w.Header().Set("Allow", "GET")
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		p, ok := rt.Get().Providers[r.URL.Query().Get("provider")]
+		if !ok {
+			http.Error(w, "unknown provider", http.StatusNotFound)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		for _, m := range p.Models {
+			fmt.Fprintf(w, `<option value="%s">%s</option>`, html.EscapeString(m), html.EscapeString(m))
+		}
+	}
 }
 
 // Shutdown gracefully stops the server.

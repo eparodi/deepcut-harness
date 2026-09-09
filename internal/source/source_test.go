@@ -140,3 +140,28 @@ func TestFetchTimeout(t *testing.T) {
 		t.Fatal("want timeout error")
 	}
 }
+
+func TestLoadDispatches(t *testing.T) {
+	// URL → Fetch.
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, "from http")
+	}))
+	defer srv.Close()
+	if got, err := (Source{}).Load(context.Background(), srv.URL); err != nil || got != "from http" {
+		t.Fatalf("Load(url) = %q, %v", got, err)
+	}
+
+	// Path → Read.
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "f.txt"), []byte("from file"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if got, err := (Source{Root: root}).Load(context.Background(), "f.txt"); err != nil || got != "from file" {
+		t.Fatalf("Load(path) = %q, %v", got, err)
+	}
+
+	// Empty → empty.
+	if got, err := (Source{}).Load(context.Background(), "  "); err != nil || got != "" {
+		t.Fatalf("Load(empty) = %q, %v", got, err)
+	}
+}

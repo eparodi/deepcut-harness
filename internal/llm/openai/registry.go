@@ -48,6 +48,20 @@ func (r *Registry) Provider(name string) (llm.Provider, error) {
 	return p, nil
 }
 
+// JSONCompleter returns the named provider as a JSON-mode completer (the
+// wizard's seam), or an error if it is absent or can't do JSON.
+func (r *Registry) JSONCompleter(name string) (llm.JSONCompleter, error) {
+	p, ok := r.providers[name]
+	if !ok {
+		return nil, fmt.Errorf("openai: provider %q not configured", name)
+	}
+	jc, ok := p.(llm.JSONCompleter)
+	if !ok {
+		return nil, fmt.Errorf("openai: provider %q does not support JSON completions", name)
+	}
+	return jc, nil
+}
+
 // Names returns the configured provider names, sorted.
 func (r *Registry) Names() []string {
 	names := make([]string, 0, len(r.providers))

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"os"
 
 	"github.com/joho/godotenv"
 )
@@ -44,6 +45,14 @@ var commands = []command{
 		usage:  "manage skills (skill create|list|get|remove|search …)",
 		errMsg: "skill command failed",
 		run:    skillCmd,
+	},
+	{
+		name:   "wizard",
+		usage:  "create an agent or skill via the LLM wizard (wizard agent|skill)",
+		errMsg: "wizard command failed",
+		run: func(args []string, stdout io.Writer) error {
+			return wizardCmd(args, os.Stdin, stdout)
+		},
 	},
 }
 

@@ -12,6 +12,13 @@ type Provider interface {
 	Complete(ctx context.Context, req Request) (Response, error)
 }
 
+// JSONCompleter is a Provider that also offers JSON-mode completion with
+// the malformed-response ladder (repair → re-ask). The wizard depends on
+// this narrower seam.
+type JSONCompleter interface {
+	CompleteJSON(ctx context.Context, req Request, target any) error
+}
+
 // Message is one chat message.
 type Message struct {
 	Role    string // "system", "user", or "assistant"

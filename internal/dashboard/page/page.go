@@ -10,7 +10,10 @@ import (
 	"net/http"
 
 	"deepcut-harness/internal/config"
+	"deepcut-harness/internal/llm"
+	"deepcut-harness/internal/source"
 	"deepcut-harness/internal/store"
+	"deepcut-harness/internal/wizard"
 )
 
 // Base is the common page data every view's template relies on: the
@@ -35,6 +38,13 @@ type Deps struct {
 	Runtime *config.Runtime
 	// Editor persists config + .env changes (settings page).
 	Editor *config.Editor
+	// LLM returns an LLM JSON-mode completer for a provider name.
+	LLM func(name string) (llm.JSONCompleter, error)
+	// Source is the base source reader (fetch config); the workspace Root
+	// is set per session by the chat feature.
+	Source source.Source
+	// Wizard manages in-memory wizard sessions.
+	Wizard *wizard.Manager
 	// Render executes the go-htmx render contract with status 200.
 	Render func(w http.ResponseWriter, r *http.Request, name string, data any)
 	// RenderStatus is Render with an explicit status (the 404 page).

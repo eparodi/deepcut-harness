@@ -71,6 +71,20 @@ func (s Source) Read(ctx context.Context, path string) (string, error) {
 	return string(data), nil
 }
 
+// Load reads a reference by local path or http(s) URL, dispatching on the
+// scheme. Empty input yields an empty result (no source). It is the shared
+// helper the wizard uses to read one --source value.
+func (s Source) Load(ctx context.Context, ref string) (string, error) {
+	ref = strings.TrimSpace(ref)
+	if ref == "" {
+		return "", nil
+	}
+	if strings.HasPrefix(ref, "http://") || strings.HasPrefix(ref, "https://") {
+		return s.Fetch(ctx, ref)
+	}
+	return s.Read(ctx, ref)
+}
+
 // maxBytes returns the effective size cap.
 func (s Source) maxBytes() int64 {
 	if s.MaxBytes > 0 {
