@@ -16,3 +16,20 @@
 
 - [ ] Wire `openai.NewRegistry` into `run.go` — the LLM layer has no runtime consumer yet; closes when the wizard lands.
 - [ ] Full SSRF allow-list guard (spec `source-reading`) — only URL-format hygiene added now.
+
+---
+
+# Session Log — 2026-09-09 (cont.) — Wizard (PR #8)
+
+| # | What happened | Root cause | Fix / resolution |
+|---|---------------|-----------|------------------|
+| 7 | Review: CLI and dashboard each hand-rolled a `readSources` helper (file-vs-URL dispatch); the dashboard copy would drift | duplicated source-loading logic across two surfaces | Extracted `source.Source.Load`; both callers reuse it. → re-affirms shared §10.66. |
+| 8 | Review: `/wizard-models` fragment request carried more than the provider param | over-broad htmx request | Scoped the endpoint to `provider` only. |
+| 9 | Review: persistence path + fragment endpoint untested | missing test coverage | Added `page.WizardPost` (agent + skill), `/wizard-models` fragment, and `source.Load` dispatch tests. |
+
+## Follow-ups / open questions (wizard)
+
+- [ ] Models not editable in `/settings` — only via `config.json`.
+- [ ] `page.WizardPost` HTTP path + CLI interactive loop untested end-to-end (needs injected fake `JSONCompleter`).
+- [ ] `internal/dashboard/page` accumulating flow logic; consider a handler/service layer.
+- [ ] No session TTL in `wizard.Manager`.
