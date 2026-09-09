@@ -75,3 +75,29 @@ func TestEditorWriteEnvKey(t *testing.T) {
 		t.Fatalf(".env mode = %o, want 600", info.Mode().Perm())
 	}
 }
+
+func TestEditorWriteEnvKeyRejectsInvalidName(t *testing.T) {
+	dir := t.TempDir()
+	e := NewEditor(filepath.Join(dir, "config.json"), filepath.Join(dir, ".env"))
+
+	for _, name := range []string{"", "NOT VALID", "FOO=BAR", "A\nB", "1LEADING"} {
+		if err := e.WriteEnvKey(name, "sk-test"); err == nil {
+			t.Fatalf("WriteEnvKey(%q) = nil, want error", name)
+		}
+	}
+}
+
+func TestValidEnvName(t *testing.T) {
+	valid := []string{"OPENAI_API_KEY", "DEEPSEEK_API_KEY", "_PRIVATE", "K"}
+	invalid := []string{"", "NOT VALID", "FOO=BAR", "1LEADING", "A-B"}
+	for _, name := range valid {
+		if !ValidEnvName(name) {
+			t.Errorf("ValidEnvName(%q) = false, want true", name)
+		}
+	}
+	for _, name := range invalid {
+		if ValidEnvName(name) {
+			t.Errorf("ValidEnvName(%q) = true, want false", name)
+		}
+	}
+}

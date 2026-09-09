@@ -22,9 +22,10 @@ import (
 // configured listen address (returning bind errors synchronously) and
 // serves in a goroutine; Shutdown drains connections.
 type Server struct {
-	logger *slog.Logger
-	addr   string
-	srv    *http.Server
+	logger    *slog.Logger
+	addr      string
+	srv       *http.Server
+	csrfToken string
 }
 
 // New wires the dashboard: parses the embedded templates (panicking on
@@ -34,9 +35,10 @@ func New(cfg config.Config, logger *slog.Logger, st store.Store, rt *config.Runt
 	if logger == nil {
 		logger = slog.Default()
 	}
-	s := &Server{logger: logger, addr: cfg.Dashboard.ListenAddr}
+	csrfToken := newCSRFToken()
+	s := &Server{logger: logger, addr: cfg.Dashboard.ListenAddr, csrfToken: csrfToken}
 
-	engine, err := newTemplateEngine()
+	engine, err := newTemplateEngine(csrfToken)
 	if err != nil {
 		// Template errors are programmer errors, not runtime errors:
 		// fail loudly at startup like template.Must.
@@ -50,8 +52,10 @@ func New(cfg config.Config, logger *slog.Logger, st store.Store, rt *config.Runt
 	mux.HandleFunc("/static/app.js", h.handleAppJS)
 	mux.HandleFunc("/favicon.svg", h.handleFavicon)
 
-	// Middleware chain: recovery outermost, logging, headers, no-cache.
+	// Middleware chain: recovery outermost, logging, headers, no-cache,
+	// CSRF gate innermost.
 	var root http.Handler = mux
+	root = csrfProtect(csrfToken, root)
 	root = noCache(root)
 	root = securityHeaders(root)
 	root = accessLog(logger, root)
@@ -90,6 +94,12 @@ func (s *Server) Start() error {
 // Addr returns the bound listen address (valid after Start).
 func (s *Server) Addr() string {
 	return s.addr
+}
+
+// CSRFToken returns the process CSRF token (used by tests and any future
+// client that renders a form outside the csrf template func).
+func (s *Server) CSRFToken() string {
+	return s.csrfToken
 }
 
 // Shutdown gracefully stops the server.

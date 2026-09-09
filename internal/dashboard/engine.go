@@ -23,10 +23,13 @@ type templateEngine struct {
 	templates map[string]*template.Template
 }
 
-func newTemplateEngine() (*templateEngine, error) {
+func newTemplateEngine(csrfToken string) (*templateEngine, error) {
 	cssBundle := template.CSS(components.CSSBundle())
 	return &templateEngine{
-		funcs:     template.FuncMap{"cssBundle": func() template.CSS { return cssBundle }},
+		funcs: template.FuncMap{
+			"cssBundle": func() template.CSS { return cssBundle },
+			"csrf":      func() string { return csrfToken },
+		},
 		compPaths: components.HTMLPaths(),
 		css:       cssBundle,
 		js:        components.JSBundle(),

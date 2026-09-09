@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 )
 
@@ -39,9 +40,22 @@ func (e *Editor) Save(cfg Config) error {
 	return atomicWrite(e.configPath, data)
 }
 
+// envNameRe matches a valid shell environment variable identifier.
+var envNameRe = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_]*$`)
+
+// ValidEnvName reports whether name is a valid shell environment variable
+// identifier (used before writing a key into .env).
+func ValidEnvName(name string) bool {
+	return envNameRe.MatchString(name)
+}
+
 // WriteEnvKey writes or updates key=value in the .env file, preserving the
-// other lines, and chmods the file to 0600.
+// other lines, and chmods the file to 0600. key must be a valid env var
+// name.
 func (e *Editor) WriteEnvKey(key, value string) error {
+	if !ValidEnvName(key) {
+		return fmt.Errorf("config: invalid env var name %q", key)
+	}
 	var lines []string
 	if data, err := os.ReadFile(e.envPath); err == nil {
 		for _, line := range strings.Split(strings.TrimRight(string(data), "\n"), "\n") {
