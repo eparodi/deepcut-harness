@@ -126,6 +126,18 @@
 Generic learnings live in ONE shared place: [`deepcut-skills`](https://github.com/eparodi/deepcut-skills) `AGENTS.md`
 Section 10 (code style, tool discipline, UI, payload verification,
 deploy ordering). Cite them as "deepcut-skills AGENTS.md §10: <rule name>".
-This section keeps only Harness-specific learnings — none exist yet.
+This section keeps only Harness-specific learnings.
 
-*Last updated: 2026-09-08*
+### 10.1 Loopback Mutating Endpoints Need CSRF
+
+**The dashboard binds `127.0.0.1` but is still CSRF-exposed** — a
+malicious webpage (or DNS rebinding) can POST to `127.0.0.1:8787/settings`
+and mutate config / write `.env` keys. Harness is single-user with no
+session layer, so the guard is a **per-process synchronizer token**: a
+`crypto/rand` token generated at startup, exposed to templates via a
+`{{csrf}}` func and to tests via `Server.CSRFToken()`, enforced by a
+middleware that constant-time-compares the form value and only gates
+non-safe methods (GET/HEAD/OPTIONS pass). Every mutating form must carry
+`<input type="hidden" name="csrf" value="{{csrf}}">`.
+
+*Last updated: 2026-09-09*
